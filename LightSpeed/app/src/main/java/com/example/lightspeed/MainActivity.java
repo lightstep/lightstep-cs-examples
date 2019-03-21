@@ -37,6 +37,10 @@ public class MainActivity extends AppCompatActivity {
     String URL = "https://1ri3o12zf6.execute-api.us-east-1.amazonaws.com/development/users";
 
 
+    ArrayAdapter adapter;
+    ArrayList<String> list = new ArrayList<String>();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,38 +57,54 @@ public class MainActivity extends AppCompatActivity {
                 String task = input.getText().toString();
                 AddItem okHttpHandler= new AddItem();
                 okHttpHandler.execute(task);
+                updateList(task);
                 input.setText("");
             }
         });
 
-
     }
 
 
-    private class StableArrayAdapter extends ArrayAdapter<String> {
-
-        HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();
-
-        public StableArrayAdapter(Context context, int textViewResourceId,
-                                  List<String> objects) {
-            super(context, textViewResourceId, objects);
-            for (int i = 0; i < objects.size(); ++i) {
-                mIdMap.put(objects.get(i), i);
-            }
+    void makeList(String[] values) {
+        ListView listview = (ListView) findViewById(R.id.list_view);
+        for (int i = 0; i < values.length; ++i) {
+            list.add(values[i]);
         }
-
-        @Override
-        public long getItemId(int position) {
-            String item = getItem(position);
-            return mIdMap.get(item);
-        }
-
-        @Override
-        public boolean hasStableIds() {
-            return true;
-        }
-
+        adapter = new ArrayAdapter(MainActivity.this,
+                android.R.layout.simple_list_item_1, list);
+        listview.setAdapter(adapter);
     }
+
+    void updateList(String value) {
+        list.add(value);
+        adapter.notifyDataSetChanged();
+    }
+
+
+//    private class StableArrayAdapter extends ArrayAdapter<String> {
+//
+//        HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();
+//
+//        public StableArrayAdapter(Context context, int textViewResourceId,
+//                                  List<String> objects) {
+//            super(context, textViewResourceId, objects);
+//            for (int i = 0; i < objects.size(); ++i) {
+//                mIdMap.put(objects.get(i), i);
+//            }
+//        }
+//
+//        @Override
+//        public long getItemId(int position) {
+//            String item = getItem(position);
+//            return mIdMap.get(item);
+//        }
+//
+//        @Override
+//        public boolean hasStableIds() {
+//            return true;
+//        }
+//
+//    }
 
     public class AddItem extends AsyncTask <String, Void, String> {
 
@@ -128,8 +148,8 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             Log.d("response", s);
-            GetList okHttpHandler= new GetList();
-            okHttpHandler.execute();
+//            GetList okHttpHandler= new GetList();
+//            okHttpHandler.execute();
 
         }
     }
@@ -159,8 +179,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            Log.d("response", s);
-
 
             try {
                 JSONArray arr = new JSONArray(s);
@@ -169,34 +187,7 @@ public class MainActivity extends AppCompatActivity {
                     values[i] = arr.getJSONObject(i).get("FirstName").toString();
                 }
 
-                final ListView listview = (ListView) findViewById(R.id.list_view);
-                final ArrayList<String> list = new ArrayList<String>();
-                for (int i = 0; i < values.length; ++i) {
-                    list.add(values[i]);
-                }
-                final StableArrayAdapter adapter = new StableArrayAdapter(MainActivity.this,
-                        android.R.layout.simple_list_item_1, list);
-                listview.setAdapter(adapter);
-
-                listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, final View view,
-                                            int position, long id) {
-                        final String item = (String) parent.getItemAtPosition(position);
-                        view.animate().setDuration(2000).alpha(0)
-                                .withEndAction(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        list.remove(item);
-                                        adapter.notifyDataSetChanged();
-                                        view.setAlpha(1);
-                                    }
-                                });
-                    }
-
-                });
-
+                makeList(values);
             } catch (JSONException e) {
 
             }
