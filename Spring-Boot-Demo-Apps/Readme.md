@@ -6,7 +6,7 @@ There are two Spring Boot applications in this directory, both instrumented usin
 3. [Adding tags to spans](https://github.com/lightstep/CS-Demo-Applications/blob/60143853e2c601bd213bf0c552191eb908a8667d/Spring-Boot-Demo-Apps/testapp-1/src/main/java/hello/HelloController.java#L28)
 
 # Getting Started
-1. Add your LightStep access token (generated at https://app.lightstep.com/<project-name>/project) to the `TracingConfig.java` file (replacing `access-token-here` with your project token).
+1. Add your LightStep access token (generated at https://app.lightstep.com/project-name/project) to the `TracingConfig.java` file (replacing `access-token-here` with your project token).
 2. Build and run both applications (`testapp-1` and `testapp-2`) using Gradle (*note: as of 6/2019 the OpenTracing plugins have not been added to the `pom.xml` for Maven support. This can be ported over from tthe `build.gradle` as needed*)
 ```
 gradle bootRun
