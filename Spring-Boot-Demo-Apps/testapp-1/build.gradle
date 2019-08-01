@@ -27,7 +27,6 @@ targetCompatibility = 1.8
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
-    // tag::actuator[]
     compile("org.springframework.boot:spring-boot-starter-actuator")
     compile('io.opentracing.contrib:opentracing-spring-cloud-starter:0.2.4')
     compile('com.lightstep.tracer:lightstep-tracer-jre:0.15.1')
