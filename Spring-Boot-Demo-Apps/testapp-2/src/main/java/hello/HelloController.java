@@ -12,15 +12,8 @@ import io.opentracing.Span;
 @RestController
 public class HelloController {
 
-    @Autowired
-    private Tracer tracer;
-
     @RequestMapping("/")
     public String index() {
-    
-        Span testspan = tracer.scopeManager().active().span();
-        testspan.setTag("Hello", "World");
-
         return "Greetings from Application 2!";
     }
     
