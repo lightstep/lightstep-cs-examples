@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 @RestController
 public class GoodByeController {
     @Autowired
-    private RestTemplate restTemplate;  //Bring in the @Bean-annotated RestTemplate from RTConfig
+    private RestTemplate restTemplate;
 
     @RequestMapping("/bye")
     public String index() {

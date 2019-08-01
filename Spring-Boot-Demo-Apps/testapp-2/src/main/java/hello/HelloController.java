@@ -14,7 +14,7 @@ public class HelloController {
 
     @RequestMapping("/")
     public String index() {
-        return "Greetings from Application 2!";
+        return "Bottom Level Service";
     }
     
 }

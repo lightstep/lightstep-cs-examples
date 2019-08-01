@@ -15,27 +15,16 @@ import io.opentracing.Scope;
 public class HelloController {
         
     @Autowired
-    private RestTemplate restTemplate;  //Bring in the @Bean-annotated RestTemplate from RTConfig
-
-//    @Autowired
-//    private Tracer tracer;              //Bring in the @Bean-annotated Tracer from TracingConfig
+    private RestTemplate restTemplate;
 
     @RequestMapping("/")
     public String index() {
     
         String uri = "http://localhost:8081/";
-//        Span testspan = tracer.scopeManager().active().span();          //Create new custom span using Tracer attached to the Spring container via @Bean
-//        testspan.setTag("Downspan-test",uri);                          //Add custom tag to new span
         String result = restTemplate.getForObject(uri, String.class);   //Make outbound call to second service using restTemplate attached to Spring
-                                                                        // container via @Bean ()
-//        try (Scope scope = tracer.buildSpan("DownStream-test").startActive(true)) {
-//            System.out.println(result);
-//        } catch (Exception ex) {
-//
-//        }
-            System.out.println(result);
+        System.out.println(result);
 
-        return "Greetings from Spring Boot!";
+        return "Top Level Service";
     }
     
 }

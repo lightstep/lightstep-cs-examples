@@ -15,7 +15,7 @@ public class TracingConfig {
         return new com.lightstep.tracer.jre.JRETracer(
                 new com.lightstep.tracer.shared.Options.OptionsBuilder()
                         .withComponentName("autowired-spring-1")
-                        .withAccessToken("s1j2ga0gaLO0+SbDjhnXeF0T6UYq/Y9p5rxkQudIw4iqIGmr8yASmG0do+0CJKjTQHt1XjPOMFy8bdg5do5s/8NuBlvYINvWIEnYTx6l")
+                        .withAccessToken("")
                         .withVerbosity(4)
                         .build());
     }
