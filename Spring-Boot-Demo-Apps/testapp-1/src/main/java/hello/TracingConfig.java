@@ -15,7 +15,7 @@ public class TracingConfig {
         return new com.lightstep.tracer.jre.JRETracer(
                 new com.lightstep.tracer.shared.Options.OptionsBuilder()
                         .withComponentName("test-spring-1")
-                        .withAccessToken("access-token-here")
+                        .withAccessToken("YOUR-ACCES-TOKEN")
                         .withVerbosity(4)
                         .build());
     }

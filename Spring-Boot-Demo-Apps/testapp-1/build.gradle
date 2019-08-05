@@ -27,16 +27,10 @@ targetCompatibility = 1.8
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
-    // tag::actuator[]
     compile("org.springframework.boot:spring-boot-starter-actuator")
     compile('io.opentracing.contrib:opentracing-spring-cloud-starter:0.2.4')
     compile('com.lightstep.tracer:lightstep-tracer-jre:0.15.1')
-    compile('com.lightstep.tracer:tracer-grpc:0.15.2')
-	compile('io.grpc:grpc-netty:1.14.0')
-	compile('io.netty:netty-tcnative-boringssl-static:2.0.12.Final')
-    // end::actuator[]
-    // tag::tests[]
+    compile('com.lightstep.tracer:tracer-okhttp:0.17.2')
     testCompile("org.springframework.boot:spring-boot-starter-test")
-    // end::tests[]
 }
 

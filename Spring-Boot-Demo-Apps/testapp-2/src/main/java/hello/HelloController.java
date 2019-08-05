@@ -21,7 +21,7 @@ public class HelloController {
         Span testspan = tracer.scopeManager().active().span();
         testspan.setTag("Hello", "World");
 
-        return "Greetings from Application 2!";
+        return "Greetings from testp-app-2!";
     }
     
 }

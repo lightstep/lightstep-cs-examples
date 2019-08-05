@@ -34,7 +34,7 @@ public class HelloController {
 
         }
 
-        return "Greetings from Spring Boot!";
+        return "Greetings from test-app-1";
     }
     
 }
