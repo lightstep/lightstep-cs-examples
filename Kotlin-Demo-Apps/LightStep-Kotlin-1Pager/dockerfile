@@ -1,0 +1,7 @@
+FROM openjdk:8
+COPY build/distributions/ /usr/src/forrest
+WORKDIR /usr/src/forrest
+RUN ls -al
+RUN tar -xf forrest-1.tar
+WORKDIR /usr/src/forrest/forrest-1/bin
+CMD ./forrest
