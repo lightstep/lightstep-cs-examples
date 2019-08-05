@@ -12,3 +12,5 @@ There are two Spring Boot applications in this directory, both instrumented usin
 gradle bootRun
 ```
 3. Curl or visit `localhost:8080` to send a request to `testapp-1`. This will trigger a second, traced request to `testapp-2`.
+
+4. You should see traces that look like this in the LightStep Trace Detailed view ![Example Trace](images/trace.png)
