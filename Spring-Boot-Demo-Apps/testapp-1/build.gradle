@@ -1,19 +1,12 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE")
-    }
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '1.5.15.RELEASE'
+    id 'war'
+    // The spring boot plugin automatically applies the Dependency Management Plugin
+    // We can omit version numbers for downstream Spring Boot dependencies as they will automatically be managed by teh Spring Boot Plugin
 }
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-
-bootJar {
+war {
     baseName = 'gs-spring-boot'
     version =  '0.1.0'
 }
@@ -28,6 +21,7 @@ targetCompatibility = 1.8
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-actuator")
+
     compile('io.opentracing.contrib:opentracing-spring-cloud-starter:0.2.4')
     compile('com.lightstep.tracer:lightstep-tracer-jre:0.15.1')
     compile('com.lightstep.tracer:tracer-okhttp:0.17.2')

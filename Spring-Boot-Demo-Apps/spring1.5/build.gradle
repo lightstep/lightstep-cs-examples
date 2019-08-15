@@ -6,24 +6,22 @@ plugins {
     // We can omit version numbers for downstream Spring Boot dependencies as they will automatically be managed by teh Spring Boot Plugin
 }
 
-war {
-    baseName = 'gs-spring-boot'
-    version =  '0.1.0'
-}
+
+group 'forrest'
+version '1'
+
+
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
 dependencies {
+    compile('io.opentracing.contrib:opentracing-spring-cloud-starter:0.2.4')
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-actuator")
-
-    compile('io.opentracing.contrib:opentracing-spring-cloud-starter:0.2.4')
-    compile('com.lightstep.tracer:lightstep-tracer-jre:0.15.1')
-    compile('com.lightstep.tracer:tracer-okhttp:0.17.2')
-    testCompile("org.springframework.boot:spring-boot-starter-test")
+    
+    
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }

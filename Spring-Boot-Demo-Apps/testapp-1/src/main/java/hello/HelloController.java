@@ -34,7 +34,7 @@ public class HelloController {
 
         }
 
-        return "Greetings from test-app-1";
+        return "Greetings from test-app-1 using Spring Boot 1.5";
     }
     
 }
