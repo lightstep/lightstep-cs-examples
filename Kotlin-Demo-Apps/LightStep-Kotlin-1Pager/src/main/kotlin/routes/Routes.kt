@@ -34,6 +34,8 @@ fun createRoutes(){
     }
 
     app.before { ctx ->
+        // Here is where I would look for a top level trace context if it exist, and extract it.
+        // Going to need soem try logic, probably
         val span = tracer.buildSpan("api entered").start()
         tracer.scopeManager().activate(span)
         span.setTag("component","javalin.io")
@@ -98,6 +100,7 @@ class MoveDAO (tracer: Tracer)  {
         return moves.getValue(moveName)
     }
 }
+
 
 
 
