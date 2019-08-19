@@ -22,7 +22,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-actuator")
 
-    compile('io.opentracing.contrib:opentracing-spring-cloud-starter:0.2.4')
+    compile('io.opentracing.contrib:opentracing-spring-cloud-starter:0.1.17')
     compile('com.lightstep.tracer:lightstep-tracer-jre:0.15.1')
     compile('com.lightstep.tracer:tracer-okhttp:0.17.2')
     testCompile("org.springframework.boot:spring-boot-starter-test")
