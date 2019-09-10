@@ -4,7 +4,7 @@ This repo is used to host applications, code samples, and helpful technical cont
 *Note:* This repo will grow over time, and we welcome any suggestions, issues, or PRs.
 
 # Table of Contents
-SpringBoot 1 & 2 Examples using Spring Cloud
-Angular Open Tracing Angular Imeplementation Guide
+1. SpringBoot 1 & 2 Examples using Spring Cloud
+2. Angular Open Tracing Angular Imeplementation Guide
 
 
