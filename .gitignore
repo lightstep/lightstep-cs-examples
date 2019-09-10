@@ -87,3 +87,7 @@ local.properties
 target/
 
 /bin
+
+
+## Angular ##
+/node_modules

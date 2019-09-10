@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '1.5.15.RELEASE'
+    id 'war'
+    // The spring boot plugin automatically applies the Dependency Management Plugin
+    // We can omit version numbers for downstream Spring Boot dependencies as they will automatically be managed by teh Spring Boot Plugin
+}
+
+war {
+    baseName = 'gs-spring-boot'
+    version =  '0.1.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+
+    compile('io.opentracing.contrib:opentracing-spring-cloud-starter:0.1.17')
+    compile('com.lightstep.tracer:lightstep-tracer-jre:0.15.1')
+    compile('com.lightstep.tracer:tracer-okhttp:0.17.2')
+    testCompile("org.springframework.boot:spring-boot-starter-test")
+}
