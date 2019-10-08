@@ -1,0 +1,17 @@
+version: '3'
+services:
+  satellite:
+    image: lightstep/collector:latest
+    environment:
+      - COLLECTOR_API_KEY=someverylongkey
+      - COLLECTOR_BABYSITTER_PORT=8000 
+      - COLLECTOR_ADMIN_PLAIN_PORT=8180
+      - COLLECTOR_HTTP_PLAIN_PORT=8182
+      - COLLECTOR_HTTP_SECURE_PORT=8183 
+      - COLLECTOR_REPORTER_BYTES_PER_PROJECT=1000000000
+    ports:
+      - "8000:8000" #Diagnostics
+      - "8180:8180" #COLLECTOR_ADMIN_PLAIN_PORT, Required for health checks
+      - "8182:8182" #COLLECTOR_HTTP_PLAIN_PORT,  Unsecure traffic, or secure traffic that terminates it's secure status before it his the satellite
+      - "8183:8183" #COLLECTOR_HTTP_SECURE_PORT, for Secure traffic
+
