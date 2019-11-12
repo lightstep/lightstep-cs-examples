@@ -14,8 +14,8 @@ public class TracingConfig {
     public Tracer lightstepTracer() throws Exception {
         return new com.lightstep.tracer.jre.JRETracer(
                 new com.lightstep.tracer.shared.Options.OptionsBuilder()
-                        .withComponentName("test-spring-2")
-                        .withAccessToken("YOUR-ACCES-TOKEN")
+                        .withComponentName("forrest-spring-latest-dependencies-2")
+                        .withAccessToken("BxY7tSC/XSvTcQzdU1UfF1dclB94Kqr8cjDtQ8yg2k85qzJUKe11Qagumnceb4adPmX18UG7eTeNHpLdXIusfioTtqX8GnPoePB3z1Gs")
                         .withVerbosity(4)
                         .build());
     }

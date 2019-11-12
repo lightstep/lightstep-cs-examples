@@ -1,5 +1,6 @@
 package hello;
 
+import io.opentracing.ScopeManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -22,17 +23,15 @@ public class HelloController {
 
     @RequestMapping("/")
     public String index() {
-    
+        Span span = tracer.buildSpan("rootMappingSpan").start();
+        tracer.scopeManager().activate(span);
+        span.setTag("type","1");
         String uri = "http://localhost:8081/";
-        Span testspan = tracer.scopeManager().active().span();          //Create new custom span using Tracer attached to the Spring container via @Bean
-        testspan.setTag("Downstream-URI",uri);                          //Add custom tag to new span
         String result = restTemplate.getForObject(uri, String.class);   //Make outbound call to second service using restTemplate attached to Spring
                                                                         // container via @Bean ()
-        try (Scope scope = tracer.buildSpan("anotherSpan").startActive(true)) {
-            System.out.println(result);
-        } catch (Exception ex) {
-
-        }
+        System.out.println(result);
+        span.log(result);
+        span.finish();
 
         return "Greetings from test-app-1";
     }

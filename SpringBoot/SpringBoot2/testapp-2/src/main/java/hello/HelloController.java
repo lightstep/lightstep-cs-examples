@@ -18,8 +18,6 @@ public class HelloController {
     @RequestMapping("/")
     public String index() {
     
-        Span testspan = tracer.scopeManager().active().span();
-        testspan.setTag("Hello", "World");
 
         return "Greetings from testp-app-2!";
     }

@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.6.RELEASE")
     }
 }
 
@@ -28,9 +28,11 @@ targetCompatibility = 1.8
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-actuator")
-    compile('io.opentracing.contrib:opentracing-spring-cloud-starter:0.2.4')
-    compile('com.lightstep.tracer:lightstep-tracer-jre:0.15.1')
-    compile('com.lightstep.tracer:tracer-okhttp:0.17.2')
+    compile('io.opentracing.contrib:opentracing-spring-cloud-starter:0.3.9')
+    compile('com.lightstep.tracer:lightstep-tracer-jre:0.18.0')
+    compile('com.lightstep.tracer:tracer-okhttp:0.19.0')
+
+    compile group: 'org.springframework.amqp', name: 'spring-rabbit', version: '2.0.12.RELEASE'
     testCompile("org.springframework.boot:spring-boot-starter-test")
 }
 
