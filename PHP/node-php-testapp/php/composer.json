@@ -1,0 +1,5 @@
+{
+    "require": {
+        "lightstep/tracer": "^1.1"
+    }
+}

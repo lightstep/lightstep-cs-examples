@@ -1,0 +1,25 @@
+version: '2'
+
+services:
+  db: 
+    container_name: test_mysql_db
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    environment: 
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: lightstep
+      MYSQL_USER: lightstep
+      MYSQL_PASSWORD: lightstep
+    ports:
+      - 3306:3306
+    volumes:
+      - test_mysql_db_data:/var/lib/mysql
+  adminer_container:
+    image: adminer:latest
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    ports:
+      - 5050:8080
+
+volumes:
+  test_mysql_db_data:
