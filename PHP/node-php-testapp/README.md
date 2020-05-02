@@ -3,7 +3,7 @@ This is a quick example to test NodeJS -> PHP context propagation reporting to p
 ### Setup
 
 * Run the mysql server `docker-compose up -d`
-* Update your "<access-token>" in both `nodejs/server.js` and `php/api.php`
+* Update your "access-token" in both `nodejs/server.js` and `php/api.php`
 
 ### Run NodeJS server
 
