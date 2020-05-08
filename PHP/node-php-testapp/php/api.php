@@ -2,12 +2,19 @@
 
 require __DIR__ . "/vendor/autoload.php";
 
-LightStep::initGlobalTracer("php-server", "<access-token>",
+if (getenv("LIGHTSTEP_ACCESS_TOKEN") === false){
+  exit("Please set the LIGHTSTEP_ACCESS_TOKEN env variable");
+}
+
+LightStep::initGlobalTracer("php-server", getenv("LIGHTSTEP_ACCESS_TOKEN"),
 );
 
+foreach (getallheaders() as $name => $value) {
+  echo "$name: $value\n";
+}
+$tracer = LightStep::getInstance();
 
-//$span = LightStep::startSpan("server_span");
-$span = LightStep::getInstance()->join("server_span", "LIGHTSTEP_FORMAT_TEXT_MAP", getallheaders());
+$span = $tracer->join("server_span", "LIGHTSTEP_FORMAT_TEXT_MAP", getallheaders());
 
 // get the HTTP method, path and body of the request
 $method = $_SERVER['REQUEST_METHOD'];
@@ -22,7 +29,7 @@ $span->logEvent($input);
 $link = mysqli_connect('localhost:3306', 'lightstep', 'lightstep', 'lightstep');
 mysqli_set_charset($link,'utf8');
 
-$child_span = LightStep::startSpan("mysql_init", array('parent' => $span));
+$child_span = $tracer->startSpan("mysql_init", array('parent' => $span));
 $child_span->setTag("db.type", "mysql");
 
 // Initialize Table on first time, subsequent will fail
@@ -72,8 +79,9 @@ switch ($method) {
 }
 
 
-$child2_span = LightStep::startSpan("mysql_query", array('parent' => $span));
+$child2_span = $tracer->startSpan("mysql_query", array('parent' => $span));
 $child2_span->setTag("query", $sql);
+$child2_span->setTag("lightstep.component_name", "php-override-service");
 $child2_span->logEvent("starting query to mysql"); 
 // excecute SQL statement
 $result = mysqli_query($link,$sql);

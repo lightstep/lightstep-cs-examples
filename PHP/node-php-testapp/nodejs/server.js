@@ -10,8 +10,13 @@ const HOST = '0.0.0.0';
 
 const app = express();
 
+if (!process.env.LIGHTSTEP_ACCESS_TOKEN) {
+    console.error("Please set the env variable LIGHTSTEP_ACCESS_TOKEN");
+    process.exit(1);
+}
+
 opentracing.initGlobalTracer(new lightstep.Tracer({
-    access_token   : '<access-token>',
+    access_token   : process.env.LIGHTSTEP_ACCESS_TOKEN,
     component_name : 'nodejs-server',
 }));
 
