@@ -5,6 +5,7 @@ This is a quick example to test NodeJS -> PHP context propagation reporting to p
 * Run the mysql server `docker-compose up -d`
 * Set the environment variable `LIGHTSTEP_ACCESS_TOKEN` to your access token obtained from Lightstep project settings. 
 
+
 ### Run NodeJS server
 
 ```bash 
