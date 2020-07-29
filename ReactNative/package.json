@@ -10,7 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "lightstep-tracer": "../lightstep/lightstep-tracer-javascript",
+    "lightstep-tracer": "^0.30.2",
     "opentracing": "^0.14.4",
     "react": "16.11.0",
     "react-native": "0.62.0"
