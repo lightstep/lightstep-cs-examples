@@ -1,14 +1,15 @@
 package k8s
 
 import (
-	"time"
-	"fmt"
-	"path"
-	"log"
 	"bufio"
-	"os"
-	"strings"
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"log"
+	"os"
+	"path"
+	"strings"
+	"time"
 )
 
 const (
@@ -113,9 +114,14 @@ func readKeyValues(filename string) ([]KV, error) {
 			log.Print("did not parse key value", scanner.Text())
 			continue
 		}
+		var value string
+		if err := json.Unmarshal([]byte(sp[1]), &value); err != nil {
+			value = sp[1]
+			log.Print("value not escaped", err)
+		}
 		ret = append(ret, KV{
 			Key:   sp[0],
-			Value: sp[1],
+			Value: value,
 		})
 	}
 	if err := scanner.Err(); err != nil {
