@@ -20,10 +20,6 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: spec.nodeName
-    - name: K8S_USER_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: spec.serviceAccountName
   volumes:
   - name: podinfo
     downwardAPI:

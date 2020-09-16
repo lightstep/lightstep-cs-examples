@@ -12,9 +12,6 @@ import (
 	"time"
 )
 
-// https://kubernetes.io/docs/tasks/inject-data-application/
-//   downward-api-volume-expose-pod-information/#capabilities-of-the-downward-api
-
 const (
 	// Volume dir and file names:
 
@@ -28,7 +25,6 @@ const (
 	// Environment variable names:
 
 	podNodeNameEnv = "K8S_NODE_NAME"
-	podUserEnv     = "K8S_USER_NAME"
 )
 
 type KV struct {
@@ -81,7 +77,6 @@ func PodInfo() (Pod, error) {
 	parseString("k8s_pod_name", path.Join(podInfoDir, podName))
 	parseString("k8s_pod_namespace", path.Join(podInfoDir, podNamespace))
 	parseEnv("k8s_node", podNodeNameEnv)
-	parseEnv("k8s_user", podUserEnv)
 
 	parseKeyValues := func(pathname string) []KV {
 		labels, err := readKeyValues(pathname)
