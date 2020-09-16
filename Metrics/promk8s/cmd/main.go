@@ -3,8 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"path"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -34,21 +32,10 @@ func twoMetrics(registry prometheus.Registerer) {
 }
 
 func main() {
-	pod := k8s.PodInfo()
-	uid, _ := readUID(path.Join(podInfoDir, podUID))
-	labels, _ := readKeyValues(path.Join(podInfoDir, podLabels))
-	startTime := time.Now().Format(time.RFC3339Nano)
-
-	allLabels := prometheus.Labels{
-		"k8s_pod_uid": uid,
-		"start_timestamp": startTime,
-	}
-	for _, kv := range labels {
-		allLabels[kv.key] = kv.value
-	}
+	pod, _ := k8s.PodInfo()
 
 	baseRegistry := prometheus.NewRegistry()
-	registry := prometheus.WrapRegistererWith(allLabels, baseRegistry)
+	registry := prometheus.WrapRegistererWith(prometheus.Labels(pod.Identifying()), baseRegistry)
 
 	twoMetrics(registry)
 

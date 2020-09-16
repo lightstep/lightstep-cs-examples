@@ -56,18 +56,27 @@ func (kv KV) String() string {
 }
 
 func PodInfo() (Pod, error) {
-	uid, err1 := readUID(path.Join(podInfoDir, podUID))
-	labels, err2 := readKeyValues(path.Join(podInfoDir, podLabels))
-	annos, err3 := readKeyValues(path.Join(podInfoDir, podAnnotations))
 	startTime := time.Now().Format(time.RFC3339Nano)
 
 	allLabels := map[string]string{
-		"k8s_pod_uid": uid,
 		"start_timestamp": startTime,
 	}
-	for _, kv := range labels {
-		allLabels[kv.Key] = kv.Value
+
+	uid, err1 := readUID(path.Join(podInfoDir, podUID))
+
+	if err1 == nil {
+		allLabels["k8s_pod_uid"] = uid
 	}
+	
+	labels, err2 := readKeyValues(path.Join(podInfoDir, podLabels))
+
+	if err2 == nil {
+		for _, kv := range labels {
+			allLabels[kv.Key] = kv.Value
+		}
+	}
+
+	annos, err3 := readKeyValues(path.Join(podInfoDir, podAnnotations))
 
 	pod := Pod{
 		uid: uid,

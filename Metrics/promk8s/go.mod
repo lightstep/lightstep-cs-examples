@@ -1,4 +1,4 @@
-module github.com/lightstep/lightstep-cs-examples/Metrics/promk8s/
+module github.com/lightstep/lightstep-cs-examples/Metrics/promk8s
 
 go 1.14
 
