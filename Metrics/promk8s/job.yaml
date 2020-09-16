@@ -12,18 +12,18 @@ spec:
     image: promk8s:current
     ports:
       - containerPort: 8000
-    env:
-    - name: MY_POD_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.name
-    - name: MY_POD_UID
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.uid
     volumeMounts:
     - name: podinfo
       mountPath: /etc/podinfo
+    env:
+    - name: K8S_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    - name: K8S_USER_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.serviceAccountName
   volumes:
   - name: podinfo
     downwardAPI:
@@ -37,3 +37,10 @@ spec:
       - path: "uid"
         fieldRef:
           fieldPath: metadata.uid
+      - path: "name"
+        fieldRef:
+          fieldPath: metadata.name
+      - path: "namespace"
+        fieldRef:
+          fieldPath: metadata.namespace
+

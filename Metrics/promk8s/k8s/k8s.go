@@ -12,11 +12,23 @@ import (
 	"time"
 )
 
+// https://kubernetes.io/docs/tasks/inject-data-application/
+//   downward-api-volume-expose-pod-information/#capabilities-of-the-downward-api
+
 const (
+	// Volume dir and file names:
+
 	podInfoDir     = "/etc/podinfo"
 	podAnnotations = "annotations"
 	podLabels      = "labels"
 	podUID         = "uid"
+	podName        = "name"
+	podNamespace   = "namespace"
+
+	// Environment variable names:
+
+	podNodeNameEnv = "K8S_NODE_NAME"
+	podUserEnv     = "K8S_USER_NAME"
 )
 
 type KV struct {
@@ -25,19 +37,9 @@ type KV struct {
 }
 
 type Pod struct {
-	startTime time.Time
-	uid         string
 	labels      []KV
 	annotations []KV
 	identifying map[string]string
-}
-
-func (k8s Pod) StartTime() time.Time {
-	return k8s.startTime
-}
-
-func (k8s Pod) UID() string {
-	return k8s.uid
 }
 
 func (k8s Pod) Identifying() map[string]string {
@@ -57,43 +59,57 @@ func (kv KV) String() string {
 }
 
 func PodInfo() (Pod, error) {
-	startTime := time.Now().Format(time.RFC3339Nano)
+	var errs []error
 
 	allLabels := map[string]string{
-		"start_timestamp": startTime,
+		"start_timestamp": time.Now().Format(time.RFC3339Nano),
 	}
 
-	uid, err1 := readUID(path.Join(podInfoDir, podUID))
-
-	if err1 == nil {
-		allLabels["k8s_pod_uid"] = uid
-	}
-	
-	labels, err2 := readKeyValues(path.Join(podInfoDir, podLabels))
-
-	if err2 == nil {
-		for _, kv := range labels {
-			allLabels[kv.Key] = kv.Value
+	parseString := func(labelKey, pathname string) {
+		if value, err := readString(pathname); err == nil {
+			allLabels[labelKey] = value
+		} else {
+			errs = append(errs, err)
 		}
 	}
+	parseEnv := func(labelKey, envname string) {
+		if value := os.Getenv(envname); value != "" {
+			allLabels[labelKey] = value
+		}
+	}
+	parseString("k8s_pod_uid", path.Join(podInfoDir, podUID))
+	parseString("k8s_pod_name", path.Join(podInfoDir, podName))
+	parseString("k8s_pod_namespace", path.Join(podInfoDir, podNamespace))
+	parseEnv("k8s_node", podNodeNameEnv)
+	parseEnv("k8s_user", podUserEnv)
 
-	annos, err3 := readKeyValues(path.Join(podInfoDir, podAnnotations))
+	parseKeyValues := func(pathname string) []KV {
+		labels, err := readKeyValues(pathname)
+		if err != nil {
+			errs = append(errs, err)
+		}
+		return labels
+	}
+	labels := parseKeyValues(path.Join(podInfoDir, podLabels))
+	annos := parseKeyValues(path.Join(podInfoDir, podLabels))
+
+	for _, kv := range labels {
+		allLabels[kv.Key] = kv.Value
+	}
 
 	pod := Pod{
-		uid: uid,
-		labels: labels,
+		labels:      labels,
 		annotations: annos,
 		identifying: allLabels,
 	}
 
-	var err error
-	if err1 != nil || err2 != nil || err3 != nil {
-		err = fmt.Errorf("read pod info: %w: %w: %w", err1, err2, err3)
+	if errs != nil {
+		return pod, fmt.Errorf("read pod info: %w", errs)
 	}
-	return pod, err
+	return pod, nil
 }
 
-func readUID(filename string) (string, error) {
+func readString(filename string) (string, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return "", err
