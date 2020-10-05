@@ -32,9 +32,8 @@ func twoMetrics(registry prometheus.Registerer) {
 
 func main() {
 	processLabels := prometheus.Labels{
-		// Note: this matches the "generic_task" in ResourceMap.
-		"_generic_location":  "space",
-		"_generic_namespace": "default",
+		"_extra_l1": "l1",
+		"_extra_l2": "l2",
 	}
 
 	baseRegistry := prometheus.NewRegistry()

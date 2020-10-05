@@ -11,3 +11,7 @@ scrape_configs:
 
     static_configs:
       - targets: ['localhost:8000']
+        labels:
+          _generic_namespace: 'default'
+          _generic_location: 'space'
+          _task_id: '123'

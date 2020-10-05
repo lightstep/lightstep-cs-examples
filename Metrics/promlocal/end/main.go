@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -89,7 +90,10 @@ func (t *testServer) ListTimeSeries(context.Context, *monitoring.ListTimeSeriesR
 	return nil, ErrUnsupported
 }
 
-func (t *testServer) CreateTimeSeries(context.Context, *monitoring.CreateTimeSeriesRequest) (*empty.Empty, error) {
-	fmt.Println("CREATE TIMESERIES!!!")
-	return nil, ErrUnsupported
+var emptyValue = empty.Empty{}
+
+func (t *testServer) CreateTimeSeries(_ context.Context, req *monitoring.CreateTimeSeriesRequest) (*empty.Empty, error) {
+	data, _ := json.MarshalIndent(req, "", "  ")
+	fmt.Println(string(data))
+	return &emptyValue, nil
 }
