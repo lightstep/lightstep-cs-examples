@@ -32,8 +32,8 @@ func twoMetrics(registry prometheus.Registerer) {
 
 func main() {
 	processLabels := prometheus.Labels{
-		"_extra_l1": "l1",
-		"_extra_l2": "l2",
+		"extra1": "value1",
+		"extra2": "value2",
 	}
 
 	baseRegistry := prometheus.NewRegistry()

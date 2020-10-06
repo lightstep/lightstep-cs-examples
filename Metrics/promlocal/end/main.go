@@ -10,10 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/golang/protobuf/ptypes/empty"
-	"google.golang.org/genproto/googleapis/api/metric"
-	"google.golang.org/genproto/googleapis/api/monitoredres"
-	monitoring "google.golang.org/genproto/googleapis/monitoring/v3"
+	metricService "github.com/lightstep/lightstep-cs-examples/Metrics/promlocal/internal/opentelemetry-proto-gen/collector/metrics/v1"
 	"google.golang.org/grpc"
 )
 
@@ -55,44 +52,15 @@ func main() {
 		log.Fatal(err)
 	}
 	grpcServer := grpc.NewServer()
-	monitoring.RegisterMetricServiceServer(grpcServer, &testServer{})
+	metricService.RegisterMetricsServiceServer(grpcServer, &testServer{})
 	go grpcServer.Serve(listener)
 	defer grpcServer.Stop()
 
 	select {}
 }
 
-func (t *testServer) ListMonitoredResourceDescriptors(context.Context, *monitoring.ListMonitoredResourceDescriptorsRequest) (*monitoring.ListMonitoredResourceDescriptorsResponse, error) {
-	return nil, ErrUnsupported
-}
-
-func (t *testServer) GetMonitoredResourceDescriptor(context.Context, *monitoring.GetMonitoredResourceDescriptorRequest) (*monitoredres.MonitoredResourceDescriptor, error) {
-	return nil, ErrUnsupported
-}
-
-func (t *testServer) ListMetricDescriptors(context.Context, *monitoring.ListMetricDescriptorsRequest) (*monitoring.ListMetricDescriptorsResponse, error) {
-	return nil, ErrUnsupported
-}
-
-func (t *testServer) GetMetricDescriptor(context.Context, *monitoring.GetMetricDescriptorRequest) (*metric.MetricDescriptor, error) {
-	return nil, ErrUnsupported
-}
-
-func (t *testServer) CreateMetricDescriptor(context.Context, *monitoring.CreateMetricDescriptorRequest) (*metric.MetricDescriptor, error) {
-	return nil, ErrUnsupported
-}
-
-func (t *testServer) DeleteMetricDescriptor(context.Context, *monitoring.DeleteMetricDescriptorRequest) (*empty.Empty, error) {
-	return nil, ErrUnsupported
-}
-
-func (t *testServer) ListTimeSeries(context.Context, *monitoring.ListTimeSeriesRequest) (*monitoring.ListTimeSeriesResponse, error) {
-	return nil, ErrUnsupported
-}
-
-var emptyValue = empty.Empty{}
-
-func (t *testServer) CreateTimeSeries(_ context.Context, req *monitoring.CreateTimeSeriesRequest) (*empty.Empty, error) {
+func (t *testServer) Export(_ context.Context, req *metricService.ExportMetricsServiceRequest) (*metricService.ExportMetricsServiceResponse, error) {
+	var emptyValue = metricService.ExportMetricsServiceResponse{}
 	data, _ := json.MarshalIndent(req, "", "  ")
 	fmt.Println(string(data))
 	return &emptyValue, nil
