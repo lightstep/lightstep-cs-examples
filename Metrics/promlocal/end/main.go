@@ -15,6 +15,7 @@ import (
 	metricService "github.com/lightstep/lightstep-cs-examples/Metrics/promlocal/internal/opentelemetry-proto-gen/collector/metrics/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	grpcMetadata "google.golang.org/grpc/metadata"
 )
 
 type (
@@ -103,8 +104,12 @@ func main() {
 	select {}
 }
 
-func (t *testServer) Export(_ context.Context, req *metricService.ExportMetricsServiceRequest) (*metricService.ExportMetricsServiceResponse, error) {
+func (t *testServer) Export(ctx context.Context, req *metricService.ExportMetricsServiceRequest) (*metricService.ExportMetricsServiceResponse, error) {
 	var emptyValue = metricService.ExportMetricsServiceResponse{}
+	md, ok := grpcMetadata.FromIncomingContext(ctx)
+	if ok {
+		fmt.Println("With metadata:", md)
+	}
 	data, _ := json.MarshalIndent(req, "", "  ")
 	fmt.Println(string(data))
 	return &emptyValue, nil
