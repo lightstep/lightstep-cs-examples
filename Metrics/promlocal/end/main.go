@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,6 +14,7 @@ import (
 
 	metricService "github.com/lightstep/lightstep-cs-examples/Metrics/promlocal/internal/opentelemetry-proto-gen/collector/metrics/v1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type (
@@ -38,7 +41,7 @@ func main() {
 		mux := http.NewServeMux()
 		mux.HandleFunc("/", handler)
 		s := &http.Server{
-			Addr:           ":7001",
+			Addr:           ":7002",
 			Handler:        mux,
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,
@@ -47,14 +50,55 @@ func main() {
 		log.Fatal(s.ListenAndServe())
 	}()
 
-	listener, err := net.Listen("tcp", "0.0.0.0:7000")
-	if err != nil {
-		log.Fatal(err)
-	}
-	grpcServer := grpc.NewServer()
-	metricService.RegisterMetricsServiceServer(grpcServer, &testServer{})
-	go grpcServer.Serve(listener)
-	defer grpcServer.Stop()
+	go func() {
+		listener, err := net.Listen("tcp", "0.0.0.0:7001")
+		if err != nil {
+			log.Fatal(err)
+		}
+		grpcServer := grpc.NewServer()
+		metricService.RegisterMetricsServiceServer(grpcServer, &testServer{})
+		go grpcServer.Serve(listener)
+		defer grpcServer.Stop()
+
+		select {}
+	}()
+
+	go func() {
+		certificate, err := tls.LoadX509KeyPair(
+			"certs/Server.crt",
+			"certs/Server.key",
+		)
+
+		certPool := x509.NewCertPool()
+		bs, err := ioutil.ReadFile("certs/CertAuth.crt")
+		if err != nil {
+			log.Fatalf("failed to read client ca cert: %s", err)
+		}
+
+		ok := certPool.AppendCertsFromPEM(bs)
+		if !ok {
+			log.Fatal("failed to append client certs")
+		}
+
+		listener, err := net.Listen("tcp", "0.0.0.0:7000")
+		if err != nil {
+			log.Fatalf("failed to listen: %s", err)
+		}
+
+		tlsConfig := &tls.Config{
+			ClientAuth:   tls.NoClientCert,
+			Certificates: []tls.Certificate{certificate},
+			ClientCAs:    certPool,
+		}
+
+		serverOption := grpc.Creds(credentials.NewTLS(tlsConfig))
+		grpcServer := grpc.NewServer(serverOption)
+		metricService.RegisterMetricsServiceServer(grpcServer, &testServer{})
+		go grpcServer.Serve(listener)
+		defer grpcServer.Stop()
+
+		select {}
+	}()
 
 	select {}
 }
