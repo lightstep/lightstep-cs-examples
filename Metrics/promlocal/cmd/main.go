@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math"
 	"math/rand"
 	"net/http"
 	"time"
@@ -15,6 +16,12 @@ var (
 		Name: "cpu_temperature_celsius",
 		Help: "Current temperature of the CPU.",
 	})
+	sineWave = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "sine_wave",
+		Help: "Current sin(time*alpha).",
+	},
+		[]string{"period"},
+	)
 	hdFailures = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "hd_errors_total",
@@ -41,6 +48,7 @@ var (
 
 func twoMetrics(registry prometheus.Registerer) {
 	registry.MustRegister(cpuTemp)
+	registry.MustRegister(sineWave)
 	registry.MustRegister(hdFailures)
 	registry.MustRegister(responseDuration)
 	registry.MustRegister(userAge)
@@ -52,6 +60,9 @@ func twoMetrics(registry prometheus.Registerer) {
 	h2 := responseDuration.With(prometheus.Labels{"client_id": "002"})
 	sSF := userAge.With(prometheus.Labels{"city": "SF"})
 	sLA := userAge.With(prometheus.Labels{"city": "LA"})
+	fastWave := sineWave.With(prometheus.Labels{"period": "fast"})
+	regWave := sineWave.With(prometheus.Labels{"period": "regular"})
+	slowWave := sineWave.With(prometheus.Labels{"period": "slow"})
 
 	go func() {
 		for {
@@ -65,6 +76,10 @@ func twoMetrics(registry prometheus.Registerer) {
 				sSF.Observe(rand.ExpFloat64())
 				sLA.Observe(rand.NormFloat64())
 			}
+			secs := float64(time.Now().UnixNano()) / float64(time.Second)
+			fastWave.Set(math.Sin(secs / (2 * math.Pi)))
+			regWave.Set(math.Sin(secs / (20 * math.Pi)))
+			slowWave.Set(math.Sin(secs / (200 * math.Pi)))
 		}
 	}()
 }
