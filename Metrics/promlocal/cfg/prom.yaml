@@ -9,9 +9,17 @@ scrape_configs:
 
     scrape_interval: 5s
 
+    # file_sd_configs:
+    #   - files: ['targets.yaml']
+
     static_configs:
-      - targets: ['localhost:8000']
-        labels:
-          _generic_namespace: 'default'
-          _generic_location: 'space'
-          _task_id: '123'
+    - targets: ['localhost:8000']
+      labels:
+        generic_namespace: 'default'
+        generic_location: 'static'
+        task_id: '321'
+
+    relabel_configs:
+      - action: replace
+        source_labels: [_generic_namespace, _generic_location]
+        target_label: remapped

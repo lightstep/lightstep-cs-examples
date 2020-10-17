@@ -77,9 +77,9 @@ func twoMetrics(registry prometheus.Registerer) {
 				sLA.Observe(rand.NormFloat64())
 			}
 			secs := float64(time.Now().UnixNano()) / float64(time.Second)
-			fastWave.Set(math.Sin(secs / (2 * math.Pi)))
-			regWave.Set(math.Sin(secs / (20 * math.Pi)))
-			slowWave.Set(math.Sin(secs / (200 * math.Pi)))
+			fastWave.Set(math.Sin(secs / (200 * math.Pi)))
+			regWave.Set(math.Sin(secs / (1000 * math.Pi)))
+			slowWave.Set(math.Sin(secs / (5000 * math.Pi)))
 		}
 	}()
 }
