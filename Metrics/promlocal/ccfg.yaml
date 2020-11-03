@@ -1,22 +1,15 @@
 receivers:
-  statsd:
-    endpoint: "0.0.0.0:8125" # default
-  hostmetrics:
-    collection_interval: 30s
-    scrapers:
-      cpu:
-      memory:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:55679
 exporters:
   logging:
     loglevel: debug
   otlp:
     endpoint: ingest.lightstep.com:443
-    headers: {"lightstep-access-token": "7d74998428f3f0bfd7659bcc387b4e06"}
 service:
   pipelines:
     metrics:
-     receivers: [otlp, hostmetrics, statsd]
+     receivers: [otlp]
      exporters: [otlp, logging]
