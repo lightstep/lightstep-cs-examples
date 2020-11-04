@@ -1,0 +1,14 @@
+output:
+  endpoint: https://ingest.staging.lightstep.com:443
+
+  headers:
+    Darkstomp-Access-Token: jfkdl
+  
+  attributes:
+    service.name: promdemo
+    board.game: checkers
+    video.game: switch
+
+wal_directory: cfg/data/wal
+
+startup_delay: 1s
