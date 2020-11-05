@@ -1,16 +1,18 @@
+# Reporting Status Timeseries
+
 Lightstep recently added several [new APIs](https://api-docs.lightstep.com/reference)  to help developers access the high value data being sent to Lightstep from their systems and integrate the rich analysis built on that data into their existing workflows
 
-As a quick overview, Lightstep customers send trillions of spans from their applications to [Lightstep Satellites](https://lightstep.com/how-it-works) hosted and managed in their own environments. Data going to the Satellites is not sampled at the clients. Hence, depending on available resources (satellite instances) and throughput of data, sometimes some spans get dropped, either at the client (throughput too high) or at the Satellites (not enough satellites). While there are controls available for [monitoring](/docs/monitor-satellite-pools-and-satellites) and for [resolving](/docs/load-balance-lightstep) issues with dropped spans, when it happens, the first question that is usually asked is "Which service was the problematic one?".
+As a quick overview, Lightstep customers send trillions of spans from their applications to [Lightstep Satellites](https://lightstep.com/how-it-works) hosted and managed in their own environments. Data going to the Satellites is not sampled at the clients. Hence, depending on available resources (satellite instances) and throughput of data, sometimes some spans get dropped, either at the client (throughput too high) or at the Satellites (not enough satellites). While there are controls available for [monitoring](https://docs.lightstep.com/docs/monitor-satellite-pools-and-satellites) and for [resolving](https://docs.lightstep.com/docs/load-balance-lightstep) issues with dropped spans, when it happens, the first question that is usually asked is "Which service was the problematic one?".
 
-Lightstep offers a [Reporting Status](/docs/monitor-services-tracers-and-satellites#clients-report-table) view for all applications currently reporting data to the Lightstep Satellites. This view pulls metrics from the Satellites directly, and only displays the "last" metric at a point in time. While this is useful for just-in-time debugging, it does not have enough data for analyzing historical discrepancies and span volume. This is where the newly released [Reporting Status API](https://api-docs.lightstep.com/reference#reportingstatus) can help.
+Lightstep offers a [Reporting Status](https://docs.lightstep.com/docs/monitor-services-tracers-and-satellites#clients-report-table) view for all applications currently reporting data to the Lightstep Satellites. This view pulls metrics from the Satellites directly, and only displays the "last" metric at a point in time. While this is useful for just-in-time debugging, it does not have enough data for analyzing historical discrepancies and span volume. This is where the newly released [Reporting Status API](https://api-docs.lightstep.com/reference#reportingstatus) can help.
 
-## Reporting Status Timeseries
+## Overview
 
 In this tutorial, we will setup the following simple workflow:
 
 **1. Call the Lightstep Reporting Status API** - Since this is just a simple REST call, the possibilities on how you want to do this are endless. I chose [Node-RED](https://github.com/node-red/node-red) because it has a simple, flexible, low-code graphical interface for creating a workflow that can be scheduled. Node-RED is built for event driven applications, but it will also work for this scheduled cron job case.
 
-> **NOTE:** [Here is an example](./example/nodejs/README.md) of a simple NodeJS script that achieves the same purpose as Node-RED, if that is your preference. 
+> **NOTE:** [Here is an example](./example/nodejs) of a simple NodeJS script that achieves the same purpose as Node-RED, if that is your preference. 
 
 **2. Storing the returned results in a timeseries database** - Any timeseries database should work as long as you have a way to write data to it in Step 1 and read data from it in Step 3. I chose [InfluxDB](https://github.com/influxdata/influxdb)
 
@@ -18,7 +20,7 @@ In this tutorial, we will setup the following simple workflow:
 
 ## Prerequisites
 
-- You will need a Lightstep API key. [Get it here](/docs/create-and-manage-api-keys).
+- You will need a Lightstep API key. [Get it here](https://docs.lightstep.com/docs/create-and-manage-api-keys).
 - Docker and `docker-compose` installed on your machine
 
 ## Setup
@@ -135,7 +137,7 @@ return msg;
 
 6. **Connect the Flow** - Draw the connections between the nodes and Deploy the flow from the top right. If everything is set up correctly, the flow should start pushing data to InfluxDB every minute. You can click the bug icon in the right sidebar to debug the flow, any errors would show up there.
 
-This entire flow is set up in the UI, but you can also load it by importing the [`flow.json`](./example/flows.json) file into Node-RED.
+This entire flow is set up in the UI, but you can also load it by importing the [`flow.json`](./example/node-red/flows.json) file into Node-RED.
 
 ## Grafana Visualization
 
@@ -151,8 +153,8 @@ Once the data is in InfluxDB we can visualize it in Grafana. Visit `localhost:30
 
 Graphing our timeseries data in Grafana is pretty straightforward. Create a new Panel and choose our InfluxDB datasource to select `span_count` (or `client_dropped_span_count` or `satellite_dropped_span_count`) and group by `tag(service)` to graph the timeseries. Since we are gathering this data every minute, I also set the resolution of the panel to 1m.
 
-![grafana-query](./example/node-red/images/query.png)
+![grafana-query](./example/node-red/images/grafana-query.png)
 
-![grafana-graph](./example/node-red/images/graph.png)
+![grafana-graph](./example/node-red/images/grafana-graph.png)
 
 You can now integrate this panel into other existing dashboards for your environments or services, including existing Lightstep Satellite dashboards to have higher fidelity visualizations about the reporting status of your services.
