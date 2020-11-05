@@ -126,7 +126,7 @@
     "type": "function",
     "z": "17677b92.8b9ee4",
     "name": "Map Tags",
-    "func": "var tmp = msg.payload;\n\nmsg.payload = [{\n    spans_count: tmp.spans_count,\n    dropped_spans_count: tmp.dropped_spans_count, \n    collector_dropped_spans_count: tmp.collector_dropped_spans_count,\n    updated_micros: tmp.updated_micros\n},\n{\n    component_name: tmp.component_name,\n    platform: tmp.platform\n}];\n\nreturn msg;",
+    "func": "var tmp = msg.payload;\n\nmsg.payload = [{\n    spans_count: tmp.spans_count,\n    client_dropped_spans_count: tmp.dropped_spans_count, \n    satellite_dropped_spans_count: tmp.collector_dropped_spans_count,\n    updated_micros: tmp.updated_micros\n},\n{\n    service: tmp.component_name,\n    platform: tmp.platform\n}];\n\nreturn msg;",
     "outputs": 1,
     "noerr": 0,
     "initialize": "",
