@@ -1,0 +1,162 @@
+[
+  {
+    "id": "17677b92.8b9ee4",
+    "type": "tab",
+    "label": "Flow 1",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "53a68450.3cc48c",
+    "type": "http request",
+    "z": "17677b92.8b9ee4",
+    "name": "GET Reporting Status",
+    "method": "GET",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "https://api.lightstep.com/public/v0.2/LightStep/projects/demo/reporting-status",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "authType": "bearer",
+    "x": 480,
+    "y": 460,
+    "wires": [["b16cfceb.2f7608"]]
+  },
+  {
+    "id": "e05d3fe9.10bd98",
+    "type": "cronplus",
+    "z": "17677b92.8b9ee4",
+    "name": "",
+    "outputField": "payload",
+    "timeZone": "",
+    "persistDynamic": false,
+    "commandResponseMsgOutput": "output1",
+    "outputs": 1,
+    "options": [
+      {
+        "name": "schedule1",
+        "topic": "schedule1",
+        "payloadType": "default",
+        "payload": "",
+        "expressionType": "cron",
+        "expression": "0 * * * * *",
+        "location": "",
+        "offset": "0",
+        "solarType": "all",
+        "solarEvents": "sunrise,sunset"
+      }
+    ],
+    "x": 300,
+    "y": 460,
+    "wires": [["53a68450.3cc48c"]]
+  },
+  {
+    "id": "ac8e1de9.6480c8",
+    "type": "split",
+    "z": "17677b92.8b9ee4",
+    "name": "",
+    "splt": "\\n",
+    "spltType": "str",
+    "arraySplt": 1,
+    "arraySpltType": "len",
+    "stream": false,
+    "addname": "",
+    "x": 790,
+    "y": 460,
+    "wires": [["f36ea7ab.8632f"]]
+  },
+  {
+    "id": "b16cfceb.2f7608",
+    "type": "function",
+    "z": "17677b92.8b9ee4",
+    "name": "Get Array",
+    "func": "//Get Print Status\nmsg.payload = msg.payload.data.status;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 660,
+    "y": 460,
+    "wires": [["ac8e1de9.6480c8"]]
+  },
+  {
+    "id": "f36ea7ab.8632f",
+    "type": "change",
+    "z": "17677b92.8b9ee4",
+    "name": "Drop Fields",
+    "rules": [
+      {
+        "t": "delete",
+        "p": "payload.satellite_pools",
+        "pt": "msg"
+      },
+      {
+        "t": "delete",
+        "p": "payload.tracers",
+        "pt": "msg"
+      },
+      {
+        "t": "delete",
+        "p": "payload.platform_versions",
+        "pt": "msg"
+      },
+      {
+        "t": "delete",
+        "p": "payload.lightstep_versions",
+        "pt": "msg"
+      },
+      {
+        "t": "delete",
+        "p": "payload.error_count",
+        "pt": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 930,
+    "y": 460,
+    "wires": [["ce9fda5c.8677e"]]
+  },
+  {
+    "id": "ce9fda5c.8677e",
+    "type": "function",
+    "z": "17677b92.8b9ee4",
+    "name": "Map Tags",
+    "func": "var tmp = msg.payload;\n\nmsg.payload = [{\n    spans_count: tmp.spans_count,\n    client_dropped_spans_count: tmp.dropped_spans_count, \n    satellite_dropped_spans_count: tmp.collector_dropped_spans_count,\n    updated_micros: tmp.updated_micros\n},\n{\n    service: tmp.component_name,\n    platform: tmp.platform\n}];\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 1080,
+    "y": 460,
+    "wires": [["f9d74e73.d62f5"]]
+  },
+  {
+    "id": "f9d74e73.d62f5",
+    "type": "influxdb out",
+    "z": "17677b92.8b9ee4",
+    "influxdb": "12f00504.fbbac3",
+    "name": "influxdb",
+    "measurement": "rs",
+    "precision": "",
+    "retentionPolicy": "",
+    "x": 1220,
+    "y": 460,
+    "wires": []
+  },
+  {
+    "id": "12f00504.fbbac3",
+    "type": "influxdb",
+    "hostname": "influxdb",
+    "port": "8086",
+    "protocol": "http",
+    "database": "lightstep",
+    "name": "",
+    "usetls": false,
+    "tls": ""
+  }
+]
