@@ -26,7 +26,7 @@ TOKEN=5fKQnjSA+LYfH5ODStKrSMDGgFNpsgZaKtrqJ5P9RNLQVD9UPFcOCFyE2f8SamoVNbUTKb33zc
 
 ((cd ${DIR} && go build ./cmd/opentelemetry-prometheus-sidecar) && \
      ${DIR}/opentelemetry-prometheus-sidecar \
-	   --grpc.header="Lightstep-Access-Token=${TOKEN}" \
+	   --destination.header="Lightstep-Access-Token=${TOKEN}" \
 	   --config-file="sidecar.yaml" \
    )
 
