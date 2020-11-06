@@ -1,6 +1,6 @@
 {
-  "name": "trace-differ",
-  "version": "1.0.0",
+  "name": "trace-differ-server",
+  "version": "0.1.0",
   "description": "Define critical trace paths in Lightstep and proactively diff them",
   "main": "src/server.js",
   "scripts": {
