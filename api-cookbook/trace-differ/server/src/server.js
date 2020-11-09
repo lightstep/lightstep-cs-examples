@@ -4,6 +4,7 @@ let express = require('express'),
   bodyParser = require('body-parser'),
   database = require('./database'),
   scheduler = require('./scheduler'),
+  differ = require('./differ'),
   logger = require('./logger')
 
 mongoose.Promise = global.Promise

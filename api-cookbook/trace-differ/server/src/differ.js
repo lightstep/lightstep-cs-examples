@@ -125,7 +125,21 @@ function getTracesForExemplars(exemplars) {
         api
           .getStoredTrace(item)
           .then((res) => {
-            cb(null, memo.concat(res.data[0].attributes.spans))
+            // Add service name to all spans
+            let spans = res.data[0].attributes.spans
+            let reporters = res.data[0].relationships.reporters
+            spans.forEach((s) => {
+              let r = reporters.find(
+                (obj) => obj['reporter-id'] == s['reporter-id']
+              )
+              s.reporter = {
+                id: r['reporter-id'],
+                name: r.attributes['lightstep.component_name'],
+                hostname: r.attributes['lightstep.hostname']
+              }
+              delete s['reporter-id']
+            })
+            cb(null, memo.concat(spans))
           })
           .catch((err) => {
             logger.warn(err)
@@ -204,10 +218,10 @@ function calculateGroupByAnalysis(spans, groupByKey) {
   let groupLabels = new Set()
   spans.forEach((s) => {
     let label = ''
-    if (groupByKey == 'operation') {
-      // only one built in available for now
+    if (groupByKey == 'service') {
+      label = s['reporter']['name']
+    } else if (groupByKey == 'operation') {
       label = s['span-name']
-      // TODO: check and add service name
     } else {
       label = s['tags'][groupByKey]
     }
