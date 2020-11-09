@@ -3,8 +3,10 @@ const winston = require('winston')
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
+    winston.format.errors({ stack: true }),
     winston.format.colorize(),
-    winston.format.json()
+    winston.format.timestamp(),
+    winston.format.prettyPrint()
   ),
   defaultMeta: { service: 'trace-differ' },
   transports: [
@@ -21,7 +23,8 @@ const logger = winston.createLogger({
 if (process.env.NODE_ENV !== 'production') {
   logger.add(
     new winston.transports.Console({
-      format: winston.format.simple()
+      format: winston.format.simple(),
+      timestamp: true
     })
   )
 }

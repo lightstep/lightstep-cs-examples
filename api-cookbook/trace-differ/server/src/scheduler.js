@@ -1,15 +1,18 @@
 let schedule = require('node-schedule')
+let moment = require('moment')
 
 let differ = require('./differ')
 let logger = require('./logger')
 
 let QueryModel = require('./models/query')
 
-const SNAPSHOT_INTERVAL_MINUTES = 10
+const SNAPSHOT_DIFF_INTERVAL_MINUTES = 10
+const SNAPSHOT_CREATE_TIMEOUT_SECONDS = 10
+const SNAPSHOT_FETCH_TIMEOUT_SECONDS = 5
 
 let startScheduler = function () {
   let rule = new schedule.RecurrenceRule()
-  rule.minute = new schedule.Range(0, 59, SNAPSHOT_INTERVAL_MINUTES) // Every 10 minutes
+  rule.minute = new schedule.Range(0, 59, SNAPSHOT_DIFF_INTERVAL_MINUTES)
 
   QueryModel.find((err, queries) => {
     if (err) {
@@ -19,10 +22,34 @@ let startScheduler = function () {
         // Schedule checking of snapshots every 10 minutes and then create a new snapshot
         schedule.scheduleJob(rule, function () {
           differ.diffLatestSnapshotsForQuery(q)
-          // Possible race condition here, bypass it with a sleep
           setTimeout(function () {
-            differ.createSnapshotForQuery(q)
-          }, 5000)
+            differ
+              .createSnapshotForQuery(q)
+              .then((snapshot) => {
+                schedule.scheduleJob(
+                  moment
+                    .unix(
+                      snapshot.completeTime + SNAPSHOT_FETCH_TIMEOUT_SECONDS
+                    )
+                    .toDate(),
+                  function () {
+                    differ.fetchSnapshotData(snapshot.snapshotId)
+                  }
+                )
+                logger.info(
+                  `Scheduled fetching of Snapshot ${
+                    snapshot.snapshotId
+                  } at ${moment
+                    .unix(
+                      snapshot.completeTime + SNAPSHOT_FETCH_TIMEOUT_SECONDS
+                    )
+                    .toDate()}`
+                )
+              })
+              .catch((err) => {
+                logger.error(err)
+              })
+          }, SNAPSHOT_CREATE_TIMEOUT_SECONDS) // Timeout to make the new snapshot after diffing for two latests snapshots has already started
         })
       })
     }

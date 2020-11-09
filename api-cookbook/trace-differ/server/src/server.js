@@ -10,7 +10,8 @@ mongoose.Promise = global.Promise
 mongoose
   .connect(database.db, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useFindAndModify: false
   })
   .then(
     () => {
@@ -24,6 +25,7 @@ mongoose
 const snapshotAPI = require('./routes/snapshot.route')
 const diffAPI = require('./routes/diff.route')
 const queryAPI = require('./routes/query.route')
+
 const app = express()
 app.use(bodyParser.json())
 app.use(
@@ -53,5 +55,4 @@ app.use((err, req, res, next) => {
   res.status(err.statusCode).send(err.message)
 })
 
-// TODO: Uncomment
-// scheduler.startScheduler();
+scheduler.startScheduler()

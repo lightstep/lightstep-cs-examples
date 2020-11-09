@@ -18,7 +18,6 @@ let querySchema = new Schema(
     groupByKeys: {
       type: Array
     }
-    // TODO: notifications senders
   },
   {
     collection: 'queries'

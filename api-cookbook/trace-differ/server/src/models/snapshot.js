@@ -17,6 +17,12 @@ let snapshotSchema = new Schema(
     },
     attributes: {
       type: Object
+    },
+    spans: {
+      type: Array
+    },
+    link: {
+      type: String
     }
   },
   {

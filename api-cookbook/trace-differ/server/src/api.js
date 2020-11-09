@@ -1,6 +1,6 @@
 let axios = require('axios')
 
-const HOST = 'http://api.lightstep.com'
+const HOST = 'https://api.lightstep.com'
 const ORG = process.env.LIGHTSTEP_ORG || ''
 const PROJECT = process.env.LIGHTSTEP_PROJECT || ''
 const API_KEY = process.env.LIGHTSTEP_API_KEY || ''
@@ -61,8 +61,23 @@ function getSnapshot(id, params) {
   })
 }
 
+function getStoredTrace(spanId) {
+  let url = `/stored-traces?span-id=${spanId}`
+  return new Promise((resolve, reject) => {
+    api
+      .get(url)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch(function (error) {
+        reject(error)
+      })
+  })
+}
+
 module.exports = {
   api,
   createSnapshot,
-  getSnapshot
+  getSnapshot,
+  getStoredTrace
 }
