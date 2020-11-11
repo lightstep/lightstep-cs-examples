@@ -1,8 +1,15 @@
 destination:
-  endpoint: https://ingest.staging.lightstep.com:443
+  # dev-local metricingest
+  endpoint: http://127.0.0.1:9876
 
   attributes:
     service.name: demo
+
+diagnostics:
+  # dev-local satellite
+  #endpoint: http://127.0.0.1:9995
+  #endpoint: https://ingest.staging.lightstep.com:443
+  endpoint: https://ingest.meta.lightstep.com:443
 
 prometheus:
   wal: cfg/data/wal

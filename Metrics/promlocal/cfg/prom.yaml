@@ -13,7 +13,7 @@ scrape_configs:
     #   - files: ['targets.yaml']
 
     static_configs:
-    - targets: ['localhost:8000']
+    - targets: ['localhost:18000']
       labels:
         generic_namespace: 'default'
         generic_location: 'static'

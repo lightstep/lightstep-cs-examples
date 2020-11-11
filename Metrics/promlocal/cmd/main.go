@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"math/rand"
@@ -11,11 +12,24 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+const portString = ":18000"
+
 var (
-	cpuTemp = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "cpu_temperature_celsius",
-		Help: "Current temperature of the CPU.",
-	})
+	// Good!
+	// cpuTemp = prometheus.NewGauge(prometheus.GaugeOpts{
+	// 	Name: "cpu_temperature_celsius",
+	// 	Help: "Current temperature of the CPU.",
+	// })
+
+	// Bad! Point type conflict with the above.
+	cpuTemp = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "cpu_temperature_celsius",
+			Help: "Current temperature of the CPU.",
+		},
+		[]string{"cpu"},
+	)
+
 	sineWave = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "sine_wave",
 		Help: "Current sin(time*alpha).",
@@ -53,8 +67,12 @@ func twoMetrics(registry prometheus.Registerer) {
 	registry.MustRegister(responseDuration)
 	registry.MustRegister(userAge)
 
-	cpuTemp.Set(65.3)
-	hdFailures.With(prometheus.Labels{"device": "/dev/sda"}).Inc()
+	// Good!
+	// cpuTemp.Set(65.3)
+
+	// Bad!
+	cpuTemp.With(prometheus.Labels{"cpu": "1"}).Add(10)
+
 	h0 := responseDuration.With(prometheus.Labels{"client_id": "000"})
 	h1 := responseDuration.With(prometheus.Labels{"client_id": "001"})
 	h2 := responseDuration.With(prometheus.Labels{"client_id": "002"})
@@ -76,6 +94,7 @@ func twoMetrics(registry prometheus.Registerer) {
 				sSF.Observe(rand.ExpFloat64())
 				sLA.Observe(rand.NormFloat64())
 			}
+			hdFailures.With(prometheus.Labels{"device": "yep0"}).Inc()
 			secs := float64(time.Now().UnixNano()) / float64(time.Second)
 			fastWave.Set(math.Sin(secs / (200 * math.Pi)))
 			regWave.Set(math.Sin(secs / (1000 * math.Pi)))
@@ -85,6 +104,7 @@ func twoMetrics(registry prometheus.Registerer) {
 }
 
 func main() {
+	fmt.Printf("Prometheus listener on 127.0.0.1%s/metrics\n", portString)
 	processLabels := prometheus.Labels{
 		"extra1": "value1",
 		"extra2": "value2",
@@ -96,5 +116,5 @@ func main() {
 	twoMetrics(registry)
 
 	http.Handle("/metrics", promhttp.HandlerFor(baseRegistry, promhttp.HandlerOpts{}))
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	log.Fatal(http.ListenAndServe(portString, nil))
 }
