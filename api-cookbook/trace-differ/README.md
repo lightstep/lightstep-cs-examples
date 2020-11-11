@@ -24,7 +24,7 @@ In this tutorial, we will setup a the following simple workflow
 
 ## Tutorial
 
-> **NOTE:** [The code for this tutorial](./example/nodejs) is available on GitHub if you'd like to follow along.
+> **NOTE:** [The code for this tutorial](./) is available on GitHub if you'd like to follow along.
 
 We will setup a simple MEVN stack for this application:
 
