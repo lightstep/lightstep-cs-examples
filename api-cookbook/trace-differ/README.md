@@ -864,13 +864,13 @@ In order to visualize the diffs, I created an experimental UI in Vue using a tem
 trace-differ$ cd client && npm run serve
 ```
 
-![Trace Differ Dashboard](./example/images/dashboard.png)
+![Trace Differ Dashboard](https://github.com/lightstep/lightstep-cs-examples/api-cookbook/trace-differ//images/dashboard.png)
 
-![Add Query](./example/images/query.png)
+![Add Query](https://github.com/lightstep/lightstep-cs-examples/api-cookbook/trace-differ//images/query.png)
 
-![Example Diff](./example/images/diff.png)
+![Example Diff](https://github.com/lightstep/lightstep-cs-examples/api-cookbook/trace-differ//images/diff.png)
 
-![Diff with missing data](./example/images/missing.png)
+![Diff with missing data](https://github.com/lightstep/lightstep-cs-examples/api-cookbook/trace-differ//images/missing.png)
 
 ## Next Steps
 
