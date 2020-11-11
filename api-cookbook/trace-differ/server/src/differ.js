@@ -1,70 +1,13 @@
 let moment = require('moment')
 let async = require('async')
 
-let api = require('./api')
 let logger = require('./logger')
 
 let DiffModel = require('./models/diff')
 let SnapshotModel = require('./models/snapshot')
 
-// Scheduled API methods
-
-function createSnapshotForQuery(q) {
-  return new Promise((resolve, reject) => {
-    api
-      .createSnapshot(q.query)
-      .then((res) => {
-        snapshot = {
-          snapshotId: res.data.id,
-          query: q.query,
-          createdAt: moment().unix(),
-          completeTime: moment(res.data.attributes['complete-time']).unix(),
-          link: ''
-        }
-        SnapshotModel.create(snapshot, (error, data) => {
-          if (error) {
-            reject(error)
-          } else {
-            logger.info(
-              `Created snapshot ${res.data.id} for query: ${q.query} `
-            )
-            resolve(snapshot)
-          }
-        })
-      })
-      .catch((error) => {
-        reject(error)
-      })
-  })
-}
-
-function fetchSnapshotData(snapshotId) {
-  getExemplarsForSnapshot(snapshotId)
-    .then((exemplars) => {
-      getTracesForExemplars(exemplars)
-        .then((spans) => {
-          // Save Data to Snapshot Model
-          SnapshotModel.findOneAndUpdate(
-            { snapshotId: snapshotId },
-            { $set: { spans: spans } },
-            (error, data) => {
-              if (error) {
-                logger.error(error)
-              } else {
-                logger.info(
-                  `Added ${spans.length} spans to snapshot ${snapshotId}`
-                )
-              }
-            }
-          )
-        })
-        .catch((err) => logger.error(err))
-    })
-    .catch((err) => logger.error(err))
-}
-
 function diffLatestSnapshotsForQuery(q) {
-  // TODO: Get latest diffs so you can only do a diff if necessary
+  // TODO: Get latest diffs so you can only do a diff if it hasn't been done already
   logger.info(`diffing latest snapshots for query {${q.query}}`)
   SnapshotModel.find({ query: q.query, spans: { $ne: [] } })
     .sort('-createdAt')
@@ -90,74 +33,6 @@ function diffLatestSnapshotsForQuery(q) {
       }
     })
 }
-
-// Helper Methods
-
-function getExemplarsForSnapshot(snapshotId) {
-  logger.info(`Getting snapshot ${snapshotId} exemplars`)
-  return new Promise((resolve, reject) => {
-    api
-      .getSnapshot(snapshotId, { 'include-exemplars': 1 })
-      .then((res) => {
-        if (res.data.attributes.exemplars) {
-          resolve(res.data.attributes.exemplars)
-        } else {
-          reject(new Error('No snapshot data returned'))
-        }
-      })
-      .catch((err) => {
-        reject(err)
-      })
-  })
-}
-
-function getTracesForExemplars(exemplars) {
-  exemplars = exemplars.map((s) => {
-    return s['span-guid']
-  })
-
-  return new Promise((resolve, reject) => {
-    // TODO: Retry to catch the Rate Limit, catch 500s for some traces not found.
-    async.reduce(
-      exemplars,
-      [],
-      (memo, item, cb) => {
-        api
-          .getStoredTrace(item)
-          .then((res) => {
-            // Add service name to all spans
-            let spans = res.data[0].attributes.spans
-            let reporters = res.data[0].relationships.reporters
-            spans.forEach((s) => {
-              let r = reporters.find(
-                (obj) => obj['reporter-id'] == s['reporter-id']
-              )
-              s.reporter = {
-                id: r['reporter-id'],
-                name: r.attributes['lightstep.component_name'],
-                hostname: r.attributes['lightstep.hostname']
-              }
-              delete s['reporter-id']
-            })
-            cb(null, memo.concat(spans))
-          })
-          .catch((err) => {
-            logger.warn(err)
-            cb(null, memo.concat([]))
-          })
-      },
-      (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      }
-    )
-  })
-}
-
-// Calculations
 
 function diffLocalSnapshots(query, aId, bId, groupByKeys) {
   // Get the span data for both snapshots from local DB
@@ -188,7 +63,7 @@ function diffLocalSnapshots(query, aId, bId, groupByKeys) {
           groups.push(diff)
         })
 
-        // TODO: thresholds of diffs
+        // TODO: Set custom thresholds
 
         // create and save a diff
         if (groups.length > 0) {
@@ -307,106 +182,6 @@ function compareAnalysis(a, b) {
   }
 }
 
-// Deprecated
-function getAnalyzerResults(id, groupByKey) {
-  logger.info(`getting snapshot ${id} for key ${groupByKey}`)
-  return api
-    .getSnapshot(id, { 'group-by': groupByKey })
-    .then((res) => {
-      return { key: groupByKey, results: res }
-    })
-    .catch((err) => {
-      logger.error(err)
-      return undefined
-    })
-}
-
-function diffSnapshots(query, a, b, groupByKeys) {
-  async.series(
-    {
-      a: function (callback) {
-        let groupByResults = groupByKeys.map((k) => {
-          return getAnalyzerResults(a, k)
-        })
-        Promise.all(groupByResults).then((res) => {
-          res = res.filter((x) => {
-            return typeof x == 'object'
-          })
-          callback(null, res)
-        })
-      },
-      b: function (callback) {
-        let groupByResults = groupByKeys.map((k) => {
-          return getAnalyzerResults(b, k)
-        })
-        Promise.all(groupByResults).then((res) => {
-          res = res.filter((x) => {
-            return typeof x == 'object'
-          })
-          callback(null, res)
-        })
-      }
-    },
-    function (err, results) {
-      // results is now equal to: {one: 1, two: 2}
-      if (err) {
-        logger.error(err)
-      } else {
-        // Do the Diff here
-        if (results.a.length > 0 && results.b.length > 0) {
-          let groups = []
-          let linkA = results.a[0].results.data.links['ui-self']
-          let linkB = results.b[0].results.data.links['ui-self']
-          // Do a diff per key
-          groupByKeys.forEach((k) => {
-            let aResults, bResults
-            results.a.forEach((r) => {
-              if (r.key == k) {
-                aResults = r.results.data.attributes['group-by']['groups']
-              }
-            })
-            results.b.forEach((r) => {
-              if (r.key == k) {
-                bResults = r.results.data.attributes['group-by']['groups']
-              }
-            })
-            // TODO: Handle pending status or bad key
-            if (aResults && bResults) {
-              let diff = compareAnalysis(aResults, bResults)
-              diff.key = k
-              groups.push(diff)
-            } else {
-              logger.warn(
-                `did not calculate diff of query {${query}} between snapshots ${a} and ${b} for key ${k}, missing analysis data`
-              )
-            }
-          })
-          if (groups.length > 0) {
-            // Add to Diff
-            let diff = {
-              query: query,
-              linkA: '', // TODO
-              linkB: '', // TODO
-              calculatedAt: moment().unix(),
-              diffs: groups
-            }
-            logger.info(
-              `diff calculated for query {${query}} between snapshot ${a} and ${b}`
-            )
-            DiffModel.create(diff, (error, data) => {
-              if (error) {
-                logger.error(error)
-              }
-            })
-          }
-        }
-      }
-    }
-  )
-}
-
 module.exports = {
-  createSnapshotForQuery,
-  fetchSnapshotData,
   diffLatestSnapshotsForQuery
 }

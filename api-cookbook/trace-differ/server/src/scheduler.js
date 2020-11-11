@@ -2,6 +2,7 @@ let schedule = require('node-schedule')
 let moment = require('moment')
 
 let differ = require('./differ')
+let directory = require('./directory')
 let logger = require('./logger')
 
 let QueryModel = require('./models/query')
@@ -10,7 +11,7 @@ const SNAPSHOT_DIFF_INTERVAL_MINUTES = 10
 const SNAPSHOT_CREATE_TIMEOUT_SECONDS = 10
 const SNAPSHOT_FETCH_TIMEOUT_SECONDS = 5
 
-let startScheduler = function () {
+function startScheduler() {
   let rule = new schedule.RecurrenceRule()
   rule.minute = new schedule.Range(0, 59, SNAPSHOT_DIFF_INTERVAL_MINUTES)
 
@@ -23,7 +24,7 @@ let startScheduler = function () {
         schedule.scheduleJob(rule, function () {
           differ.diffLatestSnapshotsForQuery(q)
           setTimeout(function () {
-            differ
+            directory
               .createSnapshotForQuery(q)
               .then((snapshot) => {
                 schedule.scheduleJob(
@@ -33,7 +34,7 @@ let startScheduler = function () {
                     )
                     .toDate(),
                   function () {
-                    differ.fetchSnapshotData(snapshot.snapshotId)
+                    directory.fetchSnapshotData(snapshot.snapshotId)
                   }
                 )
                 logger.info(
