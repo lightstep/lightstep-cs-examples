@@ -1,25 +1,24 @@
 let axios = require('axios')
+let constants = require('./constants')
 
-const HOST = 'https://api.lightstep.com'
-const ORG = process.env.LIGHTSTEP_ORG || ''
-const PROJECT = process.env.LIGHTSTEP_PROJECT || ''
-const API_KEY = process.env.LIGHTSTEP_API_KEY || ''
-
-if (ORG == '' || PROJECT == '' || API_KEY == '') {
+if (constants.ORG == '' || constants.PROJECT == '' || constants.API_KEY == '') {
   console.error(
     'Please set the environment variables: LIGHTSTEP_ORG, LIGHTSTEP_PROJECT, LIGHTSTEP_API_KEY'
   )
-  process.exit(1)
+  process.exit(1) // exit if the variables have not been set
 }
 
+// Create the main client
 const api = axios.create({
-  baseURL: `${HOST}/public/v0.2/${ORG}/projects/${PROJECT}`,
+  baseURL: `${constants.HOST}/public/v0.2/${constants.ORG}/projects/${constants.PROJECT}`,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    Authorization: 'Bearer ' + API_KEY
+    Authorization: `Bearer ${constants.API_KEY}`
   }
 })
+
+// API Methods (api-docs.lightstep.com)
 
 function createSnapshot(query) {
   var body = JSON.stringify({

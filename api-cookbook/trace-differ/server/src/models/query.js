@@ -9,9 +9,6 @@ let querySchema = new Schema(
     name: {
       type: String
     },
-    createdBy: {
-      type: String
-    },
     createdAt: {
       type: Number
     },

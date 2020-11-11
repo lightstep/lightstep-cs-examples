@@ -21,36 +21,28 @@ function startScheduler() {
     } else {
       queries.forEach((q) => {
         // Schedule checking of snapshots every 10 minutes and then create a new snapshot
-        schedule.scheduleJob(rule, function () {
+        schedule.scheduleJob(rule, () => {
           differ.diffLatestSnapshotsForQuery(q)
-          setTimeout(function () {
+          setTimeout(() => {
             directory
               .createSnapshotForQuery(q)
               .then((snapshot) => {
-                schedule.scheduleJob(
-                  moment
-                    .unix(
-                      snapshot.completeTime + SNAPSHOT_FETCH_TIMEOUT_SECONDS
-                    )
-                    .toDate(),
-                  function () {
-                    directory.fetchSnapshotData(snapshot.snapshotId)
-                  }
-                )
+                let s = snapshot.completeTime + SNAPSHOT_FETCH_TIMEOUT_SECONDS
+                let t = moment.unix(s).toDate()
+                schedule.scheduleJob(t, () => {
+                  directory.fetchSnapshotData(snapshot.snapshotId)
+                })
                 logger.info(
-                  `Scheduled fetching of Snapshot ${
-                    snapshot.snapshotId
-                  } at ${moment
-                    .unix(
-                      snapshot.completeTime + SNAPSHOT_FETCH_TIMEOUT_SECONDS
-                    )
-                    .toDate()}`
+                  `Scheduled fetching of Snapshot ${snapshot.snapshotId} at ${t}`
                 )
               })
               .catch((err) => {
                 logger.error(err)
               })
-          }, SNAPSHOT_CREATE_TIMEOUT_SECONDS) // Timeout to make the new snapshot after diffing for two latests snapshots has already started
+          }, SNAPSHOT_CREATE_TIMEOUT_SECONDS)
+          // Timeout to create the new snapshot after diffing for two
+          // latests snapshots has already started so that we don't
+          // get stuck in a loop and never check
         })
       })
     }

@@ -21,7 +21,7 @@ function diffLatestSnapshotsForQuery(q) {
         if (snapshots.length > 1) {
           // get group by results for each snapshot and each key
           // diff the two snapshots for the keys
-          diffLocalSnapshots(
+          diffSnapshots(
             q.query,
             snapshots[1].snapshotId,
             snapshots[0].snapshotId,
@@ -34,7 +34,7 @@ function diffLatestSnapshotsForQuery(q) {
     })
 }
 
-function diffLocalSnapshots(query, aId, bId, groupByKeys) {
+function diffSnapshots(query, aId, bId, groupByKeys) {
   // Get the span data for both snapshots from local DB
   async.mapValues(
     { a: aId, b: bId },
