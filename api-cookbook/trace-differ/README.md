@@ -24,7 +24,7 @@ In this tutorial, we will setup a the following simple workflow:
 
 ## Tutorial
 
-> **NOTE:** The entire code for this application [is available on GitHub](https://github.com/lightstep/lightstep-cs-examples/api-cookbook/trace-differ) if you'd like to follow along.
+> **NOTE:** The entire code for this application [is available on GitHub](.) if you'd like to follow along.
 
 We will setup a simple MEVN stack for this application:
 
@@ -156,7 +156,7 @@ server$ mkdir models && cd models
 models$ touch diff.js query.js snapshot.js
 ```
 
-Here is the example for `query.js`, the rest are available in the [code repo](https://github.com/lightstep/lightstep-cs-examples/api-cookbook/trace-differ/server/src/models).
+Here is the example for `query.js`, the rest are available in the [code repo](./server/src/models).
 
 ```javascript
 /* query.js */
@@ -196,7 +196,7 @@ server$ mkdir routes && cd routes
 routes$ touch diff.route.js snapshot.route.js query.route.js
 ```
 
-Here is `query.route.js` for example. A simple CRUD scaffold using Mongoose. The rest are available in the [code repo](https://github.com/lightstep/lightstep-cs-examples/api-cookbook/trace-differ/server/src/routes).
+Here is `query.route.js` for example. A simple CRUD scaffold using Mongoose. The rest are available in the [code repo](./server/src/routes).
 
 ```javascript
 /* query.route.js */
@@ -858,19 +858,19 @@ Once snapshots and diffs start getting created, they will also be visible at `lo
 
 ### Experimental UI
 
-In order to visualize the diffs, I created an experimental UI in Vue using a template provided by [Creative Tim](https://www.creative-tim.com/). [The code for this UI is available here](https://github.com/lightstep/lightstep-cs-examples/api-cookbook/trace-differ/client) and can be run with the following:
+In order to visualize the diffs, I created an experimental UI in Vue using a template provided by [Creative Tim](https://www.creative-tim.com/). [The code for this UI is available here](./client) and can be run with the following:
 
 ```shell
 trace-differ$ cd client && npm run serve
 ```
 
-![Trace Differ Dashboard](https://github.com/lightstep/lightstep-cs-examples/api-cookbook/trace-differ//images/dashboard.png)
+![Trace Differ Dashboard](./images/dashboard.png)
 
-![Add Query](https://github.com/lightstep/lightstep-cs-examples/api-cookbook/trace-differ//images/query.png)
+![Add Query](./images/query.png)
 
-![Example Diff](https://github.com/lightstep/lightstep-cs-examples/api-cookbook/trace-differ//images/diff.png)
+![Example Diff](./images/diff.png)
 
-![Diff with missing data](https://github.com/lightstep/lightstep-cs-examples/api-cookbook/trace-differ//images/missing.png)
+![Diff with missing data](./images/missing.png)
 
 ## Next Steps
 
