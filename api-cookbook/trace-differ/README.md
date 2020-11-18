@@ -2,25 +2,25 @@
 
 Lightstep recently added several [new APIs](https://api-docs.lightstep.com/reference) to help developers access the high value data being sent to Lightstep from their systems and integrate the rich analysis built on that data into their existing workflows.
 
-As a quick overview, Lightstep customers send trillions of spans from their applications to [Lightstep Satellites](https://lightstep.com/how-it-works) hosted and managed in their own environments. Data going to the Satellites is not sampled at the clients. This ensures that when a user is querying for this data in Lightstep, 100% of the un-sampled data is available for real-time analysis. Lightstep Satellites then use intelligent, dynamic sampling to ensure behavior outliers and anomalies are always well represented, as well as the RED metrics and histograms are created with the full representative data set. The outcome of this query in [Explorer](https://docs.lightstep.com/docs/query-span-data) is saved in a ["Snapshot"](https://docs.lightstep.com/docs/query-span-data#view-snapshots) in our SaaS.
+Lightstep customers send trillions of spans from their applications to [Lightstep Satellites](https://lightstep.com/how-it-works) hosted and managed in their own environments. Data going to the Satellites is not sampled at the clients. This ensures that when a user is querying for this data in Lightstep, 100% of the un-sampled data is available for real-time analysis. Lightstep Satellites then use intelligent, dynamic sampling to ensure behavior outliers and anomalies are always well represented, as well as the RED metrics and histograms are created with the full representative data set. The outcome of this query in [Explorer](https://docs.lightstep.com/docs/query-span-data) is saved in a ["Snapshot"](https://docs.lightstep.com/docs/query-span-data#view-snapshots) in our SaaS.
 
-A Snapshot contains rich analysis data that is very useful for investigating issues, so why not supercharge it with building more custom functionality on top of it? We can use the new Lightstep [Snapshot APIs](https://api-docs.lightstep.com/reference#snapshots) to programmatically diff two different snapshots in time. This is the **Trace Diffing** use case, where we can define critical request paths in our system and automatically track when deviations or anomalies occur.
+A Snapshot contains rich analysis data that is very useful for investigating issues, so why not supercharge it with building more custom functionality on top of it? We can use the new [Snapshot APIs](https://api-docs.lightstep.com/reference#snapshots) to programmatically diff two snapshots in time. This is the **Trace Diffing** use case, where we can define critical request paths (traces) in our system and automatically track when deviations or anomalies occur.
 
 ## Overview
 
-In this tutorial, we will setup a the following simple workflow
+In this tutorial, we will setup a the following simple workflow:
 
-**1. Define important queries that we want to track** - The Explorer lets you choose any arbitrary set of `service`, `operation`, and `attributes` to create a targeted and dynamic query. This helps to narrow down your analysis to a specific set of data, reducing MTTR. For demo purposes, we will choose a simple query, `service IN ("android")` from our [Sandbox](https://app.lightstep.com/play) demo data.
+**1. Define important queries that we want to track** - The Explorer in Lightstep lets you choose any arbitrary set of `service`, `operation`, and `attributes` to create a targeted and dynamic query. This helps to narrow down your analysis to a specific set of data during your investigation, reducing MTTR. For demo purposes, we will choose a simple query, `service IN ("android")` from our [Sandbox](https://app.lightstep.com/play) demo data.
 
-**2. Set up automatic snapshot creation** - Once the query is defined, we will create snapshots of the data every 10 minutes (configurable), this will ensure that we are pull the relevant analysis and underlying data back to the SaaS periodically and we can run further analyses on it.
+**2. Set up automatic snapshot creation** - Once the query is defined, we will create snapshots of the data every 10 minutes (configurable), this will ensure that we are pulling the relevant analysis and underlying data back to the SaaS periodically and we can run further analyses on it.
 
-**3. Find the differences between two snapshots** - For two given snapshots, and a set of keys to group by, we will take the entire underlying trace datasets from the snapshots and find whether any values are missing, if there are any new values, or for ones that exist in both snapshots, if there are significant changes in RED metrics.
+**3. Find the differences between two snapshots** - For two given snapshots, and a set of keys to group by (think attributes like `customer`, `region`, `http.status_code`, etc.), we will take the entire underlying trace datasets from the snapshots and find whether any values are missing, if there are any new values, or for ones that exist in both snapshots, if there are significant changes in RED metrics.
 
 ## Prerequisites
 
-- You will need a Lightstep API key. [Get it here](https://docs.lightstep.com/docs/create-and-manage-api-keys).
+- You will need a Lightstep account and a Lightstep API key. [Get it here](https://docs.lightstep.com/docs/create-and-manage-api-keys).
 - Docker and `docker-compose` installed on your machine
-- Node and NPM installed on your machine
+- `node` and `npm` installed on your machine
 
 ## Tutorial
 
@@ -29,8 +29,8 @@ In this tutorial, we will setup a the following simple workflow
 We will setup a simple MEVN stack for this application:
 
 - MongoDB - To store the queries, snapshot data, and diffs
-- ExpressJS - Simple REST API to interact with the application
-- VueJS - A client UI to visualize results
+- ExpressJS - REST API to interact with the application
+- VueJS - An experimental client UI to visualize results
 
 ```shell
 $ mkdir trace-differ
@@ -156,37 +156,7 @@ server$ mkdir models && cd models
 models$ touch diff.js query.js snapshot.js
 ```
 
-```javascript
-/* diff.js */
-
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-
-let diffSchema = new Schema(
-  {
-    query: {
-      type: String,
-    },
-    calculatedAt: {
-      type: Number,
-    },
-    linkA: {
-      type: String,
-    },
-    linkB: {
-      type: String,
-    },
-    diffs: {
-      type: Array,
-    },
-  },
-  {
-    collection: "diffs",
-  }
-);
-
-module.exports = mongoose.model("Diff", diffSchema);
-```
+Here is the example for `query.js`, the rest are available in the [code repo](./server/src/models).
 
 ```javascript
 /* query.js */
@@ -217,44 +187,6 @@ let querySchema = new Schema(
 module.exports = mongoose.model("Query", querySchema);
 ```
 
-```javascript
-/* snapshot.js */
-
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-
-let snapshotSchema = new Schema(
-  {
-    snapshotId: {
-      type: String,
-    },
-    completeTime: {
-      type: Number,
-    },
-    createdAt: {
-      type: Number,
-    },
-    query: {
-      type: String,
-    },
-    attributes: {
-      type: Object,
-    },
-    spans: {
-      type: Array,
-    },
-    link: {
-      type: String,
-    },
-  },
-  {
-    collection: "snapshots",
-  }
-);
-
-module.exports = mongoose.model("Snapshot", snapshotSchema);
-```
-
 ---
 
 Create the Express routes to handle each entity in our data model.
@@ -264,7 +196,7 @@ server$ mkdir routes && cd routes
 routes$ touch diff.route.js snapshot.route.js query.route.js
 ```
 
-Most of these three look similar, here is `query.route.js` for example. A simple CRUD scaffold using Mongoose. [Here are the rest of the routes](./server/src/routes/).
+Here is `query.route.js` for example. A simple CRUD scaffold using Mongoose. The rest are available in the [code repo](./server/src/routes).
 
 ```javascript
 /* query.route.js */
@@ -361,7 +293,7 @@ mongoose
     }
   );
 
-// We wait for DB to initialize, without it the app is useless
+// We wait for DB connection to initialize
 function runApp() {
   const app = express();
   app.use(bodyParser.json());
@@ -400,13 +332,13 @@ You will notice that the last line of the code starts our scheduler, which we wi
 
 ### 3. Directory
 
-By default, the [GET /snapshot/:id](https://api-docs.lightstep.com/reference#getsnapshotbyid) API returns a list of exemplar spans, however, there is a lot more data lurking underneath the surface. When a Snapshot is created, Lightstep first grabs all the spans that match the query, and in the background starts trace assembly for all the traces that first set of spans were a part of. This data has to be fetched separately using the [`GET /stored-traces`](https://api-docs.lightstep.com/reference#storedtracesid) API.
+By default, the [GET /snapshot/:id](https://api-docs.lightstep.com/reference#getsnapshotbyid) API returns a list of exemplar spans, however, there is a lot more data lurking underneath the surface. When a Snapshot is created, Lightstep first tracks all the spans that match the query explicitly, and in the background starts trace assembly for all the traces that first set of spans were a part of. This data can be fetched separately using the [`GET /stored-traces`](https://api-docs.lightstep.com/reference#storedtracesid) API.
 
 To this end, let's build a snapshot directory that will be responsible for creating snapshots, and fetching the related underlying data and storing it in MongoDB.
 
-First, we will need a Lightstep API client using `axios`. We will need to call a few APIs: `POST /snapshots`, `GET /snapshot/:id`, and `GET /stored-traces`
+First, we will create a Lightstep API client using `axios`. We will need to call a few APIs: `POST /snapshots`, `GET /snapshot/:id`, and `GET /stored-traces`
 
-> **Note:** This is optional, I like to keep it separate in case we want to swap this out for a different vendor. This is also why we keep our data models separate.
+> **Note:** This is optional, I like to keep it separate in case we want to swap this out for a different API in the future. This is also why we keep our data models separate.
 
 ```shell
 server$ touch api.js
@@ -435,7 +367,7 @@ const api = axios.create({
   },
 });
 
-// API Methods (api-docs.lightstep.com)
+// API Methods (https://api-docs.lightstep.com)
 
 function createSnapshot(query) {
   var body = JSON.stringify({
@@ -890,7 +822,7 @@ function startScheduler() {
           }, SNAPSHOT_CREATE_TIMEOUT_SECONDS);
           // Timeout to create the new snapshot after diffing for two
           // latests snapshots has already started so that we don't
-          // get stuck in a loop and never check
+          // get stuck in a loop of only checking stale data
         });
       });
     }
@@ -902,7 +834,7 @@ module.exports = {
 };
 ```
 
-## See it in Action
+## See it in action
 
 After setting the relevant Lightstep specific variables in `server/constants.js`, run the server:
 
@@ -912,7 +844,7 @@ server$ node server.js
 
 By default, no queries exist, so nothing will happen.
 
-Since we set up a REST API for Trace Differ, we can use Postman or curl to create a query matching the Lightstep Query Syntax.
+Since we set up a REST API for, we can use Postman or curl to create a query matching the [Lightstep Query Syntax](https://docs.lightstep.com/docs/query-span-data#run-a-query).
 
 ```shell
 $ curl --location --request POST 'localhost:4000/api/queries' \
@@ -926,23 +858,23 @@ Once snapshots and diffs start getting created, they will also be visible at `lo
 
 ### Experimental UI
 
-In order to visualize the diffs, I created an experimental UI in Vue using an excellent Vue template provided by [Creative Tim](https://www.creative-tim.com/). [The code for this UI is available here](./client) and can be run with the following
+In order to visualize the diffs, I created an experimental UI in Vue using a template provided by [Creative Tim](https://www.creative-tim.com/). [The code for this UI is available here](./client) and can be run with the following:
 
 ```shell
 trace-differ$ cd client && npm run serve
 ```
 
-![Trace Differ Dashboard](./example/images/dashboard.png)
+![Trace Differ Dashboard](./images/dashboard.png)
 
-![Add Query](./example/images/query.png)
+![Add Query](./images/query.png)
 
-![Example Diff](./example/images/diff.png)
+![Example Diff](./images/diff.png)
 
-![Diff with missing data](./example/images/missing.png)
+![Diff with missing data](./images/missing.png)
 
 ## Next Steps
 
-In this tutorial, we build a simple snapshot directory and implemented scheduled trace diffing on important queries. This base can be extended to many different used cases, including but not limited to:
+In this tutorial, we built a simple snapshot directory and implemented scheduled trace diffing on important queries. This base can be extended to many different use cases, including but not limited to:
 
 - Setting custom thresholds for diffing
 - Implement alerting to get paged when a significant diff is encountered
