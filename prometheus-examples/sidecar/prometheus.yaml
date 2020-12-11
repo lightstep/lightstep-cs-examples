@@ -1,0 +1,8 @@
+# Configures a single job named "sample-app".
+scrape_configs:
+  - job_name: 'sample-app'
+
+    scrape_interval: 5s
+
+    static_configs:
+    - targets: ['localhost:18000']
