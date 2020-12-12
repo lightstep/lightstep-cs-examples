@@ -1,0 +1,15 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:55679
+exporters:
+  logging:
+    loglevel: debug
+  otlp:
+    endpoint: ingest.lightstep.com:443
+service:
+  pipelines:
+    metrics:
+     receivers: [otlp]
+     exporters: [otlp, logging]

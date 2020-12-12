@@ -1,0 +1,25 @@
+global:
+  scrape_interval: 15s
+
+  external_labels:
+    monitor: 'jmacd-scraper'
+
+scrape_configs:
+  - job_name: 'sample-app'
+
+    scrape_interval: 5s
+
+    # file_sd_configs:
+    #   - files: ['targets.yaml']
+
+    static_configs:
+    - targets: ['localhost:18000']
+      labels:
+        generic_namespace: 'default'
+        generic_location: 'static'
+        task_id: '321'
+
+    relabel_configs:
+      - action: replace
+        source_labels: [_generic_namespace, _generic_location]
+        target_label: remapped

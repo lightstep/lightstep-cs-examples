@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: promk8s-demo
+  labels:
+    A: B
+  annotations:
+    C: D
+spec:
+  containers:
+  - name: promk8sjob
+    image: promk8s:current
+    ports:
+      - containerPort: 8000
+    volumeMounts:
+    - name: podinfo
+      mountPath: /etc/podinfo
+    env:
+    - name: K8S_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+  volumes:
+  - name: podinfo
+    downwardAPI:
+      items:
+      - path: "labels"
+        fieldRef:
+          fieldPath: metadata.labels
+      - path: "annotations"
+        fieldRef:
+          fieldPath: metadata.annotations
+      - path: "uid"
+        fieldRef:
+          fieldPath: metadata.uid
+      - path: "name"
+        fieldRef:
+          fieldPath: metadata.name
+      - path: "namespace"
+        fieldRef:
+          fieldPath: metadata.namespace
+
