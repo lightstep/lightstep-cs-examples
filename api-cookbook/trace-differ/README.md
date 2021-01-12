@@ -864,13 +864,13 @@ In order to visualize the diffs, I created an experimental UI in Vue using a tem
 trace-differ$ cd client && npm run serve
 ```
 
-![Trace Differ Dashboard](./images/dashboard.png)
+![Trace Differ Dashboard](./example/images/dashboard.png)
 
-![Add Query](./images/query.png)
+![Add Query](./example/images/query.png)
 
-![Example Diff](./images/diff.png)
+![Example Diff](./example/images/diff.png)
 
-![Diff with missing data](./images/missing.png)
+![Diff with missing data](./example/images/missing.png)
 
 ## Next Steps
 
