@@ -22,11 +22,12 @@ tracerProvider.addSpanProcessor(
       serviceName: "otel-web-test",
       url: "https://ingest.lightstep.com:443/api/v2/otel/trace",
       headers: {
-        "Lightstep-Access-Token": "<YOUR_ACCESS_TOKEN>",
+        "Lightstep-Access-Token": "<YOUR ACCESS TOKEN>",
       },
     })
   )
 );
+// For debugging
 tracerProvider.addSpanProcessor(
   new SimpleSpanProcessor(new ConsoleSpanExporter())
 );
@@ -36,4 +37,4 @@ tracerProvider.register({
 });
 
 // This tracer will be available in downstream files
-const tracer = provider.getTracer("otel-web-test");
+const tracer = tracerProvider.getTracer("otel-web-test");
