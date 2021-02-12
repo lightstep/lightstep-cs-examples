@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- otel.min.js is exposing everything globally -->
+    <script type="text/javascript" src="otel.min.js"></script>
+    <script type="text/javascript">
+      var tracerProvider = new WebTracerProvider();
+      tracerProvider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+      tracerProvider.addSpanProcessor(new BatchSpanProcessor(new CollectorTraceExporter({
+        headers: {
+          'Lightstep-Access-Token': '',
+        },
+        serviceName: 'web-example',
+        url: 'https://ingest.lightstep.com:443/api/v2/otel/trace',
+      })));
+
+      tracerProvider.register({
+        contextManager: new ZoneContextManager(),
+      });
+
+      registerInstrumentations({
+        instrumentations: [
+          new DocumentLoad(),
+          new UserInteractionInstrumentation(),
+          new XMLHttpRequestInstrumentation(),
+        ],
+        tracerProvider: tracerProvider,
+      });
+    </script>
+</head>
+
+<body>
+Open console to see traces<br/>
+Also update "Lightstep-Access-Token" to see traces in Lightstep<br/>
+<button id="button">Click me</button>
+
+<script>
+  function getData(url, callback) {
+    var req = new XMLHttpRequest();
+    req.open('GET', url, true);
+    req.setRequestHeader('Content-Type', 'application/json');
+    req.setRequestHeader('Accept', 'application/json');
+    req.send();
+    req.onload = function () {
+      callback();
+    };
+  }
+
+  function clickMe() {
+    // just an example to download something
+    getData('https://httpbin.org/get?a=1', () => {
+      console.log('data downloaded 1');
+    });
+  }
+
+  document.getElementById('button').addEventListener('click', clickMe);
+</script>
+
+</body>
+
+</html>
