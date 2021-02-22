@@ -1,0 +1,14 @@
+version: "3"
+services:
+  database:
+    image: "mongo"
+    container_name: "mongo-db-container"
+    environment:
+      - MONGO_INITDB_DATABASE=lightstep
+      - MONGO_INITDB_ROOT_USERNAME=lightstep
+      - MONGO_INITDB_ROOT_PASSWORD=lightstep
+    volumes:
+      - ./db/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./db/mongo-volume:/data/db
+    ports:
+      - "27017-27019:27017-27019"
