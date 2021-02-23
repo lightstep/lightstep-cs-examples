@@ -1,5 +1,6 @@
 // MongoDB
-const DATABASE = 'mongodb://lightstep:lightstep@127.0.0.1:27017/lightstep'
+const MONGO_URL = 'mongodb://lightstep:lightstep@127.0.0.1:27017/lightstep'
+const REDIS_URL = 'redis://127.0.0.1:6379'
 
 // Lightstep API
 const HOST = 'https://api.lightstep.com'
@@ -8,9 +9,10 @@ const PROJECT = process.env.LIGHTSTEP_PROJECT || 'demo'
 const API_KEY = process.env.LIGHTSTEP_API_KEY || ''
 
 module.exports = {
-  DATABASE: DATABASE,
-  HOST: HOST,
-  ORG: ORG,
-  PROJECT: PROJECT,
-  API_KEY: API_KEY
+  MONGO_URL,
+  REDIS_URL,
+  HOST,
+  ORG,
+  PROJECT,
+  API_KEY
 }

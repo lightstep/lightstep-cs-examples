@@ -1,5 +1,6 @@
 let axios = require('axios')
 let constants = require('./constants')
+let logger = require('./logger')
 
 if (constants.ORG == '' || constants.PROJECT == '' || constants.API_KEY == '') {
   console.error(
@@ -54,6 +55,8 @@ function getTime() {
   } else if (timezone_offset_min == 0) {
     timezone_standard = '-00:00'
   }
+
+  timezone_standard = '-00:00' // FIXME: Remove this
 
   let now = new Date()
   let oldest =

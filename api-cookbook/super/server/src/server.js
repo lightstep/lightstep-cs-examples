@@ -4,13 +4,14 @@ let express = require('express'),
   bodyParser = require('body-parser'),
   constants = require('./constants'),
   scheduler = require('./scheduler'),
+  mixer = require('./mixer'),
   logger = require('./logger')
 
 const serviceAPI = require('./routes/service.route')
 
 mongoose.Promise = global.Promise
 mongoose
-  .connect(constants.DATABASE, {
+  .connect(constants.MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false
@@ -53,6 +54,6 @@ function runApp() {
     if (!err.statusCode) err.statusCode = 500
     res.status(err.statusCode).send(err.message)
   })
-
+  mixer.startMixer()
   scheduler.startScheduler()
 }
