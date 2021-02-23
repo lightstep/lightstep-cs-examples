@@ -12,3 +12,13 @@ services:
       - ./db/mongo-volume:/data/db
     ports:
       - "27017-27019:27017-27019"
+  redis:
+    image: "redis"
+    container_name: "redis-container"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./db/redis-volume:/var/lib/redis
+      - ./db/redis.conf:/usr/local/etc/redis/redis.conf
