@@ -1,14 +1,18 @@
-let express = require('express'),
+const { tracer } = require('./tracer')
+
+const express = require('express'),
   cors = require('cors'),
   mongoose = require('mongoose'),
-  bodyParser = require('body-parser'),
-  constants = require('./constants'),
+  bodyParser = require('body-parser')
+
+const constants = require('./constants'),
   scheduler = require('./scheduler'),
   mixer = require('./mixer'),
   logger = require('./logger')
 
 const serviceAPI = require('./routes/service.route')
 
+// Initialize DB and start app
 mongoose.Promise = global.Promise
 mongoose
   .connect(constants.MONGO_URL, {
@@ -26,7 +30,7 @@ mongoose
     }
   )
 
-// We wait for DB to initialize, without it the app is useless
+// Application
 function runApp() {
   const app = express()
   app.use(bodyParser.json())

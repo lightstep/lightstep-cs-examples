@@ -2,7 +2,7 @@
   "name": "super-service-diagram",
   "version": "0.1.0",
   "description": "",
-  "main": "src/server.js",
+  "main": "src/server-init.js",
   "scripts": {
     "serve": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -23,6 +23,7 @@
     "bottleneck": "^2.19.5",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "lightstep-opentelemetry-launcher-node": "^0.14.0",
     "moment": "^2.29.1",
     "mongoose": "^5.11.17",
     "node-schedule": "^2.0.0",

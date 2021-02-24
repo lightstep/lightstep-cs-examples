@@ -1,6 +1,7 @@
-let axios = require('axios')
-let constants = require('./constants')
-let logger = require('./logger')
+const axios = require('axios')
+const constants = require('./constants')
+const { tracer } = require('./tracer')
+const { context, setSpan } = require('@opentelemetry/api')
 
 if (constants.ORG == '' || constants.PROJECT == '' || constants.API_KEY == '') {
   console.error(
@@ -23,14 +24,20 @@ const api = axios.create({
 function getServices() {
   let url = `/directory/services`
   return new Promise((resolve, reject) => {
-    api
-      .get(url)
-      .then((response) => {
-        resolve(response.data)
-      })
-      .catch((error) => {
-        reject(error)
-      })
+    const span = tracer.startSpan('getServices')
+    context.with(setSpan(context.active(), span), () => {
+      api
+        .get(url)
+        .then((response) => {
+          span.end()
+          resolve(response.data)
+        })
+        .catch((error) => {
+          span.setAttribute('error', true)
+          span.end()
+          reject(error)
+        })
+    })
   })
 }
 
@@ -60,8 +67,18 @@ function getTime() {
 
   let now = new Date()
   let oldest =
-    new Date(now - 10 * 60000).toISOString().split('.')[0] + timezone_standard
-  let youngest = now.toISOString().split('.')[0] + timezone_standard
+    new Date(
+      now -
+        (constants.STREAM_TIME_AGO_MINUTES +
+          constants.STREAM_TIME_RANGE_MINUTES) *
+          60000
+    )
+      .toISOString()
+      .split('.')[0] + timezone_standard
+  let youngest =
+    new Date(now - constants.STREAM_TIME_AGO_MINUTES * 60000)
+      .toISOString()
+      .split('.')[0] + timezone_standard
   return {
     oldest: oldest,
     youngest: youngest
@@ -71,44 +88,65 @@ function getTime() {
 function getStreams() {
   let url = `/streams`
   return new Promise((resolve, reject) => {
-    api
-      .get(url)
-      .then((response) => {
-        resolve(response.data)
-      })
-      .catch((error) => {
-        reject(error)
-      })
+    const span = tracer.startSpan('getStreams')
+    context.with(setSpan(context.active(), span), () => {
+      api
+        .get(url)
+        .then((response) => {
+          span.end()
+          resolve(response.data)
+        })
+        .catch((error) => {
+          span.setAttribute('error', true)
+          span.end()
+          reject(error)
+        })
+    })
   })
 }
 
 function getStreamTimeseries(streamId) {
   // Returns the timeseries of the past 10 minutes
+
   let time = getTime()
   let url = `/streams/${streamId}/timeseries?oldest-time=${time.oldest}&youngest-time=${time.youngest}&resolution-ms=60000&include-exemplars=1`
+  console.log(url)
+
   return new Promise((resolve, reject) => {
-    api
-      .get(url)
-      .then((response) => {
-        resolve(response.data)
-      })
-      .catch((error) => {
-        reject(error)
-      })
+    const span = tracer.startSpan('getStreamTimeseries')
+    context.with(setSpan(context.active(), span), () => {
+      api
+        .get(url)
+        .then((response) => {
+          span.end()
+          resolve(response.data)
+        })
+        .catch((error) => {
+          span.setAttribute('error', true)
+          span.end()
+          reject(error)
+        })
+    })
   })
 }
 
 function getStoredTrace(spanId) {
   let url = `/stored-traces?span-id=${spanId}`
   return new Promise((resolve, reject) => {
-    api
-      .get(url)
-      .then((response) => {
-        resolve(response.data)
-      })
-      .catch(function (error) {
-        reject(error)
-      })
+    const span = tracer.startSpan('getStoredTrace')
+    context.with(setSpan(context.active(), span), () => {
+      api
+        .get(url)
+        .then((response) => {
+          span.end()
+          resolve(response.data)
+        })
+        .catch(function (error) {
+          span.setAttribute('error', true)
+          span.end()
+          reject(error)
+        })
+    })
   })
 }
 
