@@ -3,6 +3,7 @@ const serviceRoute = express.Router()
 
 let ServiceModel = require('../models/service')
 let TagModel = require('../models/tag')
+let EdgeModel = require('../models/edge')
 
 serviceRoute.route('/services').get((req, res, next) => {
   let response = { services: [] }
@@ -18,8 +19,6 @@ serviceRoute.route('/services').get((req, res, next) => {
         let oldestTime = req.body['oldest-time']
           ? Date.parse(req.body['oldest-time'])
           : youngestTime - 60000 * 1440 * 5 // default is last 5 days
-
-        // console.log(new Date(youngestTime), new Date(oldestTime))
 
         // TODO: Validate time range
         // TODO: Validate attribute
@@ -83,6 +82,38 @@ serviceRoute.route('/services').post((req, res, next) => {
       return next(error)
     } else {
       res.json(data)
+    }
+  })
+})
+
+serviceRoute.route('/services/diagram').get((req, res, next) => {
+  let svcs = []
+  let nodes = []
+  let links = []
+
+  EdgeModel.find((error, edges) => {
+    if (error) {
+      return next(error)
+    } else {
+      links = edges.map((e) => {
+        if (!svcs.includes(e.from)) {
+          svcs.push(e.from)
+          nodes.push({ name: e.from })
+        }
+        if (!svcs.includes(e.to)) {
+          svcs.push(e.to)
+          nodes.push({ name: e.to })
+        }
+
+        return {
+          to: e.to,
+          from: e.from
+        }
+      })
+      res.json({
+        services: nodes,
+        edges: links
+      })
     }
   })
 })
