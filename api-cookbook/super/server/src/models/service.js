@@ -7,7 +7,9 @@ let serviceSchema = new Schema(
       type: String
     },
     lastSeen: {
-      type: Date
+      type: Number,
+      get: (v) => Math.round(v),
+      set: (v) => Math.round(v)
     }
   },
   {

@@ -37,7 +37,6 @@ function syncStreams() {
         (sid, cb) => {
           const streamSpan = tracer.startSpan('syncStream')
           streamSpan.setAttribute('stream-id', sid)
-          logger.warn(sid)
           context.with(setSpan(context.active(), streamSpan), () => {
             api
               .getStreamTimeseries(sid)
@@ -133,8 +132,8 @@ function startScheduler() {
   rule.minute = new schedule.Range(0, 59, INTERVAL_MINUTES)
 
   // schedule.scheduleJob(rule, () => {
-  syncServices()
-  syncStreams()
+  // syncServices()
+  // syncStreams()
   // })
 
   logger.info('Started scheduler')

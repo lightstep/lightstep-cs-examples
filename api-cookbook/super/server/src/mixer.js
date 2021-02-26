@@ -23,6 +23,11 @@ let limiter = new Bottleneck({
   }
 })
 
+function roundDate(timeStamp) {
+  timeStamp -= timeStamp % (24 * 60 * 60 * 1000) //subtract amount of time since midnight
+  return new Date(timeStamp).getTime()
+}
+
 function parseTrace(spans, reporters) {
   // Create a service map of nodes and edges between services
   let services = {}
@@ -39,7 +44,7 @@ function parseTrace(spans, reporters) {
     refinedSpans[s['span-id']] = {
       parentId: s.tags.parent_span_guid ? s.tags.parent_span_guid : '',
       service: r_id,
-      startTime: s['start-time-micros'] / 1000000
+      startTime: s['start-time-micros']
     }
     for (let [key, value] of Object.entries(s.tags)) {
       if (key != 'parent_span_guid') {
@@ -62,7 +67,7 @@ function parseTrace(spans, reporters) {
         edges[s2] = {}
       }
       if (s1 != s2 && !Object.keys(edges[s2]).includes(s1)) {
-        edges[s2][s1] = value.startTime
+        edges[s2][s1] = new Date(value.startTime / 1000).getTime()
       }
     }
   }
@@ -98,21 +103,13 @@ async function updateServiceMap(span_guid) {
                 filter: {
                   to: k,
                   from: key,
-                  lastSeen: Date.parse(
-                    today.getUTCFullYear(),
-                    today.getUTCMonth() + 1,
-                    today.getUTCDate()
-                  )
+                  lastSeen: roundDate(new Date().getTime())
                 },
                 update: {
                   $set: {
                     to: k,
                     from: key,
-                    lastSeen: Date.parse(
-                      today.getUTCFullYear(),
-                      today.getUTCMonth() + 1,
-                      today.getUTCDate()
-                    )
+                    lastSeen: roundDate(new Date().getTime())
                   }
                 },
                 upsert: true
@@ -149,22 +146,14 @@ async function updateServiceMap(span_guid) {
                         service: s.name,
                         key: key,
                         value: v,
-                        lastSeen: Date.parse(
-                          today.getUTCFullYear(),
-                          today.getUTCMonth() + 1,
-                          today.getUTCDate()
-                        )
+                        lastSeen: roundDate(new Date().getTime())
                       },
                       update: {
                         $set: {
                           service: s.name,
                           key: key,
                           value: v,
-                          lastSeen: Date.parse(
-                            today.getUTCFullYear(),
-                            today.getUTCMonth() + 1,
-                            today.getUTCDate()
-                          )
+                          lastSeen: roundDate(new Date().getTime())
                         }
                       },
                       upsert: true

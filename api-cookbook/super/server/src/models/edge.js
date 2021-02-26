@@ -10,7 +10,9 @@ let edgeSchema = new Schema(
       type: String
     },
     lastSeen: {
-      type: Number
+      type: Number,
+      get: (v) => Math.round(v),
+      set: (v) => Math.round(v)
     }
   },
   {

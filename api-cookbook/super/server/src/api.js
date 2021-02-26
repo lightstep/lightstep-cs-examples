@@ -110,7 +110,6 @@ function getStreamTimeseries(streamId) {
 
   let time = getTime()
   let url = `/streams/${streamId}/timeseries?oldest-time=${time.oldest}&youngest-time=${time.youngest}&resolution-ms=60000&include-exemplars=1`
-  console.log(url)
 
   return new Promise((resolve, reject) => {
     const span = tracer.startSpan('getStreamTimeseries')
