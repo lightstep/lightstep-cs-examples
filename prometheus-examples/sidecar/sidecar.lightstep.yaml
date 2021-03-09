@@ -1,0 +1,13 @@
+destination:
+  endpoint: https://ingest.staging.lightstep.com:443
+
+  headers: 
+    lightstep-access-token: 5fKQnjSA+LYfH5ODStKrSMDGgFNpsgZaKtrqJ5P9RNLQVD9UPFcOCFyE2f8SamoVNbUTKb33zcVMTI+vXVY=
+
+prometheus:
+  wal: ./data/wal
+
+startup_delay: 1s
+
+log:
+  level: debug

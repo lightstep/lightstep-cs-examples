@@ -1,28 +1,31 @@
 destination:
   # Use the insecure endpoint
-  # endpoint: http://127.0.0.1:17000
-
-  # Use the secure endpoint
-  endpoint: https://127.0.0.1:17001
-
-  attributes:
-    service.name: demo
-
-# This configures the certificate authority used to create the test
-# server certificates.
-security:
-  root_certificates:
-  - certs/caroot.crt
-
-# To enable diagnostics about the sidecar itself, sending to the same
-# OTLP service used above (insecure):
-diagnostics:
   endpoint: http://127.0.0.1:17000
 
-# Prometheus writes its WAL into ./data by default:
-prometheus:
-  wal: ./data/wal
+  #endpoint: https://127.0.0.1:17001
 
-# All metrics are prefixed by "sidecar-demo."
+  # metricingest plain port  
+  #endpoint: http://127.0.0.1:9876
+
+  # metricingest external grpc port
+  #endpoint: http://127.0.0.1:10716
+
+  # Collector plain port
+  # endpoint: http://127.0.0.1:9998
+
+  compression: none
+
+  headers:
+    lightstep-access-token: jzBy2simG8KqfzCt0UA4PD36EF+7/pIGStpCYNChtii6WfoU0Na53xFFzM67LoqqlRRhNy3fdeHJ/0wOvS0=
+
+disable_diagnostics: false
+disable_supervisor: false
+
+log:
+  level: debug
+
+#filters:
+#  - age{}
+
 opentelemetry:
-  metrics_prefix: sidecar-demo.
+  metrics_prefix: test.
