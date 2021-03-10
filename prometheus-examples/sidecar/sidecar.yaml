@@ -1,6 +1,6 @@
 destination:
   # Use the insecure endpoint
-  endpoint: http://127.0.0.1:17000
+  #endpoint: http://127.0.0.1:17000
 
   #endpoint: https://127.0.0.1:17001
 
@@ -8,7 +8,7 @@ destination:
   #endpoint: http://127.0.0.1:9876
 
   # metricingest external grpc port
-  #endpoint: http://127.0.0.1:10716
+  endpoint: http://127.0.0.1:10716
 
   # Collector plain port
   # endpoint: http://127.0.0.1:9998
