@@ -22,7 +22,7 @@ disable_diagnostics: false
 disable_supervisor: false
 
 log:
-  level: debug
+  level: info
 
 #filters:
 #  - age{}
