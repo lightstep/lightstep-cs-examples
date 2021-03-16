@@ -1,6 +1,8 @@
 const { tracer } = require('./tracer')
 const { context, setSpan, getSpan } = require('@opentelemetry/api')
 
+const async = require('async')
+
 const redis = require('redis')
 const subscriber = redis.createClient()
 const logger = require('./logger')
@@ -43,7 +45,7 @@ function parseTrace(spans, reporters) {
     r_id = s['reporter-id']
     refinedSpans[s['span-id']] = {
       parentId: s.tags.parent_span_guid ? s.tags.parent_span_guid : '',
-      service: r_id,
+      reporter: r_id, // reporter id
       startTime: s['start-time-micros']
     }
     for (let [key, value] of Object.entries(s.tags)) {
@@ -60,9 +62,10 @@ function parseTrace(spans, reporters) {
   let edges = []
 
   for (let [sid, value] of Object.entries(refinedSpans)) {
-    let s1 = services[value.service].name
-    if (value.parentId != '') {
-      let s2 = services[refinedSpans[value.parentId].service].name
+    let s1 = services[value.reporter].name
+    if (value.parentId != '' && refinedSpans[value.parentId]) {
+      // if refinedSpans does not contain the parent, then it's a missing span, so no way to draw the edge
+      let s2 = services[refinedSpans[value.parentId].reporter].name
       if (!edges[s2]) {
         edges[s2] = {}
       }
@@ -70,6 +73,7 @@ function parseTrace(spans, reporters) {
         edges[s2][s1] = new Date(value.startTime / 1000).getTime()
       }
     }
+    // otherwise root span so no edges
   }
 
   return {
@@ -92,95 +96,117 @@ async function updateServiceMap(span_guid) {
         )
         parseSpan.end()
 
-        // Add Edges in Mongo
-        const edgeSpan = tracer.startSpan('addEdges')
-        let today = new Date()
-        let bulkOps = []
-        for (let [key, value] of Object.entries(parsed.edges)) {
-          for (let [k, v] of Object.entries(value)) {
-            let upsertDoc = {
-              updateOne: {
-                filter: {
-                  to: k,
-                  from: key,
-                  lastSeen: roundDate(new Date().getTime())
-                },
-                update: {
-                  $set: {
-                    to: k,
-                    from: key,
-                    lastSeen: roundDate(new Date().getTime())
-                  }
-                },
-                upsert: true
-              }
-            }
-            bulkOps.push(upsertDoc)
-          }
-        }
-        EdgeModel.collection
-          .bulkWrite(bulkOps)
-          .then((result) => {
-            if (result.upsertedCount > 0) {
-              logger.info(
-                `Upserted ${result.upsertedCount} edges for trace ${span_guid}`
-              )
-            }
-            edgeSpan.end()
-          })
-          .catch((err) => {
-            edgeSpan.setAttribute('error', true)
-            edgeSpan.end()
-            logger.error(JSON.stringify(err, null, 2))
-          })
-          .finally(() => {
-            const tagSpan = tracer.startSpan('addTags')
-            bulkOps = []
-            // Add Tags in Mongo
-            for (let [sid, s] of Object.entries(parsed.services)) {
-              for (let [key, values] of Object.entries(s.tags)) {
-                values.forEach((v) => {
+        async.parallel(
+          [
+            async.reflect(function (cb) {
+              // Add Edges in Mongo
+              const edgeSpan = tracer.startSpan('addEdges')
+              let bulkEdgeOps = []
+              for (let [key, value] of Object.entries(parsed.edges)) {
+                for (let [k, v] of Object.entries(value)) {
                   let upsertDoc = {
                     updateOne: {
                       filter: {
-                        service: s.name,
-                        key: key,
-                        value: v,
+                        to: k,
+                        from: key,
                         lastSeen: roundDate(new Date().getTime())
                       },
                       update: {
                         $set: {
-                          service: s.name,
-                          key: key,
-                          value: v,
+                          to: k,
+                          from: key,
                           lastSeen: roundDate(new Date().getTime())
                         }
                       },
                       upsert: true
                     }
                   }
-                  bulkOps.push(upsertDoc)
-                })
-              }
-            }
-            TagModel.collection
-              .bulkWrite(bulkOps)
-              .then((result) => {
-                tagSpan.end()
-                span.end()
-                if (result.upsertedCount > 0) {
-                  logger.info(
-                    `Upserted ${result.upsertedCount} tags for trace ${span_guid}`
-                  )
+                  bulkEdgeOps.push(upsertDoc)
                 }
-              })
-              .catch((err) => {
-                tagSpan.setAttribute('error', true)
-                tagSpan.end()
-                span.end()
-                logger.error(JSON.stringify(err, null, 2))
-              })
-          })
+              }
+              if (bulkEdgeOps.length > 0) {
+                EdgeModel.collection
+                  .bulkWrite(bulkEdgeOps)
+                  .then((result) => {
+                    if (result.upsertedCount > 0) {
+                      logger.info(
+                        `Upserted ${result.upsertedCount} edges for trace ${span_guid}`
+                      )
+                    }
+                    edgeSpan.end()
+                    cb(null, 'done')
+                  })
+                  .catch((err) => {
+                    edgeSpan.setAttribute('error', true)
+                    edgeSpan.end()
+                    cb(err.message, null)
+                  })
+              }
+            }),
+            async.reflect(function (cb) {
+              const tagSpan = tracer.startSpan('addTags')
+              bulkTagOps = []
+              // Add Tags in Mongo
+              for (let [sid, s] of Object.entries(parsed.services)) {
+                for (let [key, values] of Object.entries(s.tags)) {
+                  values.forEach((v) => {
+                    let upsertDoc = {
+                      updateOne: {
+                        filter: {
+                          service: s.name,
+                          key: key,
+                          value: v,
+                          lastSeen: roundDate(new Date().getTime())
+                        },
+                        update: {
+                          $set: {
+                            service: s.name,
+                            key: key,
+                            value: v,
+                            lastSeen: roundDate(new Date().getTime())
+                          }
+                        },
+                        upsert: true
+                      }
+                    }
+                    bulkTagOps.push(upsertDoc)
+                  })
+                }
+              }
+              if (bulkTagOps.length > 0) {
+                TagModel.collection
+                  .bulkWrite(bulkTagOps)
+                  .then((result) => {
+                    tagSpan.end()
+                    if (result.upsertedCount > 0) {
+                      logger.info(
+                        `Upserted ${result.upsertedCount} tags for trace ${span_guid}`
+                      )
+                    }
+                    cb(null, 'done')
+                  })
+                  .catch((err) => {
+                    tagSpan.setAttribute('error', true)
+                    tagSpan.end()
+                    cb(err.message, null)
+                  })
+              }
+            })
+          ],
+          (err, results) => {
+            if (err) {
+              span.setAttribute('error', true)
+              logger.error(JSON.stringify(err, null, 2))
+              span.addEvent(
+                'errorMessage',
+                JSON.stringify(err.message, null, 2)
+              )
+            } else {
+              logger.info(`Upserted tags and edges for trace ${span_guid}`)
+            }
+            span.end()
+          }
+        )
       })
       .catch((err) => {
         // TODO: retry

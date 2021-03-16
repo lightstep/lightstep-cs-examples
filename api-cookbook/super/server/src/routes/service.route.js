@@ -14,7 +14,6 @@ serviceRoute.route('/services').get((req, res, next) => {
       // You can pass in an attribute to get just it's values for each service
       // TODO: This should probably be elsewhere maybe in tag route.
       if (req.query.attribute && req.query.attribute != '') {
-        console.log('here')
         // find the tag values and append to the service when they were seen
         let youngestTime = req.query['youngest-time']
           ? Date.parse(req.query['youngest-time'])
@@ -93,7 +92,6 @@ serviceRoute.route('/services/diagram').get((req, res, next) => {
   // Get the super static service diagram
   EdgeModel.find((error, edges) => {
     if (error) {
-      console.log(error)
       return next(error)
     } else {
       links = edges.map((e) => {

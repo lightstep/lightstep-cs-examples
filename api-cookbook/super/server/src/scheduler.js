@@ -131,10 +131,13 @@ function startScheduler() {
   let rule = new schedule.RecurrenceRule()
   rule.minute = new schedule.Range(0, 59, INTERVAL_MINUTES)
 
-  // schedule.scheduleJob(rule, () => {
-  // syncServices()
-  // syncStreams()
-  // })
+  syncServices() // TODO: turn on
+  syncStreams() // TODO: turn on
+
+  schedule.scheduleJob(rule, () => {
+    syncServices() // TODO: turn on
+    syncStreams() // TODO: turn on
+  })
 
   logger.info('Started scheduler')
 }
