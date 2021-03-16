@@ -11,21 +11,25 @@ serviceRoute.route('/services').get((req, res, next) => {
     if (error) {
       return next(error)
     } else {
-      if (req.body.attribute) {
+      // You can pass in an attribute to get just it's values for each service
+      // TODO: This should probably be elsewhere maybe in tag route.
+      if (req.query.attribute && req.query.attribute != '') {
+        console.log('here')
         // find the tag values and append to the service when they were seen
-        let youngestTime = req.body['youngest-time']
-          ? Date.parse(req.body['youngest-time'])
+        let youngestTime = req.query['youngest-time']
+          ? Date.parse(req.query['youngest-time'])
           : Date.now()
-        let oldestTime = req.body['oldest-time']
-          ? Date.parse(req.body['oldest-time'])
-          : youngestTime - 60000 * 1440 * 5 // default is last 5 days
+        let oldestTime = req.query['oldest-time']
+          ? Date.parse(req.query['oldest-time'])
+          : youngestTime - 60000 * 1440 * 30 // default is last 30 days
 
         // TODO: Validate time range
         // TODO: Validate attribute
+        let attribute = req.query.attribute
         TagModel.find(
           {
             $and: [
-              { key: req.body.attribute },
+              { key: attribute },
               {
                 $and: [
                   {
@@ -54,11 +58,16 @@ serviceRoute.route('/services').get((req, res, next) => {
                     lastSeen: new Date(t.lastSeen)
                   }
                 })
+                // FIXME: Order by latest value seen
+                serviceTags.sort((a, b) => {
+                  return b.lastSeen - a.lastSeen
+                })
+
                 response.services.push({
                   name: s.name,
                   lastSeen: new Date(s.lastSeen),
                   attributes: {
-                    [req.body.attribute]: serviceTags
+                    [attribute]: serviceTags.slice(0, 5) // FIXME: Only return 10 latest values
                   }
                 })
               })
@@ -76,23 +85,15 @@ serviceRoute.route('/services').get((req, res, next) => {
   })
 })
 
-serviceRoute.route('/services').post((req, res, next) => {
-  ServiceModel.create(req.body, (error, data) => {
-    if (error) {
-      return next(error)
-    } else {
-      res.json(data)
-    }
-  })
-})
-
+// TODO: Move this to Edge route
 serviceRoute.route('/services/diagram').get((req, res, next) => {
   let svcs = []
   let nodes = []
   let links = []
-
+  // Get the super static service diagram
   EdgeModel.find((error, edges) => {
     if (error) {
+      console.log(error)
       return next(error)
     } else {
       links = edges.map((e) => {
@@ -124,19 +125,6 @@ serviceRoute.route('/services/:id').get((req, res, next) => {
       return next(error)
     } else {
       res.json(data)
-    }
-  })
-})
-
-// Delete snapshot
-serviceRoute.route('/services/:id').delete((req, res, next) => {
-  ServiceModel.findByIdAndRemove(req.params.id, (error, data) => {
-    if (error) {
-      return next(error)
-    } else {
-      res.status(200).json({
-        msg: data
-      })
     }
   })
 })

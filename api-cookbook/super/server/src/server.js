@@ -11,6 +11,7 @@ const constants = require('./constants'),
   logger = require('./logger')
 
 const serviceAPI = require('./routes/service.route')
+const tagAPI = require('./routes/tag.route')
 
 // Initialize DB and start app
 mongoose.Promise = global.Promise
@@ -42,6 +43,7 @@ function runApp() {
   app.use(cors())
 
   app.use('/api', serviceAPI)
+  app.use('/api', tagAPI)
 
   const port = process.env.APP_PORT || 4000
 
