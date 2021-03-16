@@ -1,6 +1,31 @@
 <template>
-  <div class="home">
-    <ServiceDiagram :data="diagramData" />
+  <div class="home container">
+    <b-field label="Overlay Attribute">
+      <b-autocomplete
+        v-model="searchAttribute"
+        placeholder="eg. platform"
+        :keep-first="false"
+        :open-on-focus="true"
+        :data="filteredAttributes"
+        field="name"
+        :clearable="true"
+        @select="o => (o ? (chosenAttribute = o.name) : (chosenAttribute = ''))"
+      />
+    </b-field>
+    <div style="border: 5px solid #eee; border-radius: 10px;">
+      <div v-if="diagramData.nodes">
+        <ServiceDiagram :diagram="diagramData" />
+      </div>
+      <div v-else>Loading diagram...</div>
+    </div>
+    <div>
+      <!-- TODO: this is for "autocomplete" -->
+      <!-- <p v-for="a in attributes" :key="a">{{ a }}</p> -->
+      <p v-for="(s, idx) in services" :key="idx">
+        {{ s.name }}
+        <span v-for="(a, idy) in s.attributes" :key="idy">{{ a }}</span>
+      </p>
+    </div>
   </div>
 </template>
 
@@ -15,180 +40,95 @@ export default {
   },
   data() {
     return {
-      diagramData: {
-        nodes: [
-          {
-            id: 'iOS',
-            group: 1
-          },
-          {
-            id: 'krakend-api-gateway',
-            group: 1
-          },
-          {
-            id: 'auth',
-            group: 1
-          },
-          {
-            id: 'inventory',
-            group: 1
-          },
-          {
-            id: 'memcached',
-            group: 1
-          },
-          {
-            id: 'inventory-db',
-            group: 1
-          },
-          {
-            id: 'store-server',
-            group: 1
-          },
-          {
-            id: 'transaction',
-            group: 2
-          },
-          {
-            id: 'transaction-db',
-            group: 1
-          },
-          {
-            id: 'store-db',
-            group: 3
-          },
-          {
-            id: 'web',
-            group: 1
-          },
-          {
-            id: 'apache',
-            group: 1
-          },
-          {
-            id: 'payment-processor',
-            group: 1
-          },
-          {
-            id: 'warehouse',
-            group: 1
-          },
-          {
-            id: 'warehouse-db',
-            group: 1
-          },
-          {
-            id: 'profile',
-            group: 1
-          },
-          {
-            id: 'android',
-            group: 3
-          },
-          {
-            id: 'profile-db',
-            group: 1
-          }
-        ],
-        edges: [
-          {
-            target: 'krakend-api-gateway',
-            source: 'iOS',
-            type: 'one'
-          },
-          {
-            target: 'auth',
-            source: 'krakend-api-gateway',
-            type: 'one'
-          },
-          {
-            target: 'inventory',
-            source: 'krakend-api-gateway',
-            type: 'one'
-          },
-          {
-            target: 'memcached',
-            source: 'inventory',
-            type: 'one'
-          },
-          {
-            target: 'inventory-db',
-            source: 'inventory',
-            type: 'one'
-          },
-          {
-            target: 'store-server',
-            source: 'krakend-api-gateway',
-            type: 'one'
-          },
-          {
-            target: 'transaction',
-            source: 'krakend-api-gateway',
-            type: 'one'
-          },
-          {
-            target: 'transaction-db',
-            source: 'transaction',
-            type: 'one'
-          },
-          {
-            target: 'store-db',
-            source: 'store-server',
-            type: 'one'
-          },
-          {
-            target: 'apache',
-            source: 'web',
-            type: 'one'
-          },
-          {
-            target: 'krakend-api-gateway',
-            source: 'web',
-            type: 'one'
-          },
-          {
-            target: 'payment-processor',
-            source: 'krakend-api-gateway',
-            type: 'one'
-          },
-          {
-            target: 'transaction',
-            source: 'payment-processor',
-            type: 'one'
-          },
-          {
-            target: 'warehouse',
-            source: 'krakend-api-gateway',
-            type: 'one'
-          },
-          {
-            target: 'memcached',
-            source: 'warehouse',
-            type: 'one'
-          },
-          {
-            target: 'warehouse-db',
-            source: 'warehouse',
-            type: 'one'
-          },
-          {
-            target: 'profile',
-            source: 'krakend-api-gateway',
-            type: 'one'
-          },
-          {
-            target: 'krakend-api-gateway',
-            source: 'android',
-            type: 'one'
-          },
-          {
-            target: 'profile-db',
-            source: 'profile',
-            type: 'one'
-          }
-        ]
-      }
+      searchAttribute: '',
+      chosenAttribute: ''
     }
+  },
+  computed: {
+    diagramData() {
+      const nodes = this.diagram.nodes
+      const svcs = this.services
+      let diagram = { nodes: [], edges: [] }
+      if (this.chosenAttribute !== '' && svcs !== []) {
+        // Update the service diagram grouped by
+        let hashCount = 1
+        let groupHash = { '': 0 }
+
+        diagram.nodes = nodes.map(n => {
+          let group = svcs.filter(s => {
+            return s.name == n.id
+          })
+          let g = ''
+          if (
+            group[0].attributes &&
+            group[0].attributes[this.chosenAttribute] &&
+            group[0].attributes[this.chosenAttribute][0]
+          ) {
+            g = group[0].attributes[this.chosenAttribute][0]['value']
+          }
+          if (g !== '' && !groupHash[g]) {
+            groupHash[g] = hashCount
+            hashCount += 1
+          }
+
+          return {
+            id: n.id,
+            group: groupHash[g]
+          }
+        })
+      } else {
+        diagram.nodes = this.$store.state.diagram.nodes.map(n => {
+          return {
+            id: n.id,
+            group: 0
+          }
+        })
+      }
+
+      diagram.edges = this.$store.state.diagram.edges.map(e => {
+        return {
+          source: e.source,
+          target: e.target,
+          type: e.type
+        }
+      })
+      return diagram
+    },
+    diagram() {
+      return this.$store.state.diagram
+    },
+    attributes() {
+      return this.$store.state.attributes
+    },
+    services() {
+      return this.$store.state.services
+    },
+    filteredAttributes() {
+      return this.attributes.filter(option => {
+        return (
+          option.name
+            .toString()
+            .toLowerCase()
+            .indexOf(this.searchAttribute.toString().toLowerCase()) >= 0
+        )
+      })
+    }
+  },
+  watch: {
+    chosenAttribute: function() {
+      // this fires anytime the attribute is updated
+      this.$store.dispatch('getServices', {
+        attribute: this.chosenAttribute
+      })
+    }
+  },
+  mounted() {
+    // This fires once
+    this.$store.dispatch('getDiagram')
+    this.$store.dispatch('getServices', {
+      attribute: this.chosenAttribute
+    })
+    this.$store.dispatch('getAttributes')
   }
 }
 </script>
