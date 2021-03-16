@@ -18,14 +18,14 @@
       </div>
       <div v-else>Loading diagram...</div>
     </div>
+    <!-- TODO: this is for "autocomplete" 
     <div>
-      <!-- TODO: this is for "autocomplete" -->
-      <!-- <p v-for="a in attributes" :key="a">{{ a }}</p> -->
       <p v-for="(s, idx) in services" :key="idx">
         {{ s.name }}
         <span v-for="(a, idy) in s.attributes" :key="idy">{{ a }}</span>
       </p>
     </div>
+    -->
   </div>
 </template>
 
@@ -48,11 +48,10 @@ export default {
     diagramData() {
       const nodes = this.diagram.nodes
       const svcs = this.services
-      let diagram = { nodes: [], edges: [] }
+      let diagram = { nodes: [], edges: [], groups: { '': 0 } }
       if (this.chosenAttribute !== '' && svcs !== []) {
         // Update the service diagram grouped by
         let hashCount = 1
-        let groupHash = { '': 0 }
 
         diagram.nodes = nodes.map(n => {
           let group = svcs.filter(s => {
@@ -66,14 +65,14 @@ export default {
           ) {
             g = group[0].attributes[this.chosenAttribute][0]['value']
           }
-          if (g !== '' && !groupHash[g]) {
-            groupHash[g] = hashCount
+          if (g !== '' && !diagram.groups[g]) {
+            diagram.groups[g] = hashCount
             hashCount += 1
           }
 
           return {
             id: n.id,
-            group: groupHash[g]
+            group: diagram.groups[g]
           }
         })
       } else {
@@ -84,7 +83,6 @@ export default {
           }
         })
       }
-
       diagram.edges = this.$store.state.diagram.edges.map(e => {
         return {
           source: e.source,

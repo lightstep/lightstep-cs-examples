@@ -6,6 +6,20 @@
 
 <script>
 import * as d3 from 'd3'
+const lsColors = [
+  '#48AAF9',
+  '#8A3EF2',
+  '#78EEDA',
+  '#D78000',
+  '#1248B3',
+  '#97DBFC',
+  '#006174',
+  '#00B6B6',
+  '#854200',
+  '#F3C8AD',
+  '#410472'
+]
+
 export default {
   name: 'ServiceDiagram',
   props: {
@@ -17,10 +31,16 @@ export default {
   data() {
     return {
       svg: null,
+      canvas: null,
       svgWidth: 0,
       node: null,
       link: null,
-      simulation: null
+      simulation: null,
+      legend: null,
+      color: d3
+        .scaleOrdinal()
+        .domain([0, 10])
+        .range(['#eee'].concat(lsColors))
     }
   },
   computed: {
@@ -30,22 +50,25 @@ export default {
   },
   watch: {
     svgWidth: function() {
-      this.svgWidth = document.getElementById('container').offsetWidth * 0.9
+      this.svgWidth = document.getElementById('container').offsetWidth
     },
     diagram: function(newD) {
       // Update here
       this.simulation.stop()
-      this.update(newD.nodes, newD.edges)
+      this.updateDiagram(newD.nodes, newD.edges)
+      this.updateLegend(newD.groups)
     }
   },
   mounted() {
-    this.svgWidth = document.getElementById('container').offsetWidth * 0.9
+    this.svgWidth = document.getElementById('container').offsetWidth
 
     this.svg = d3.select('#diagram')
 
+    this.canvas = this.svg.append('g')
+
     this.simulation = d3
       .forceSimulation()
-      .force('charge', d3.forceManyBody().strength(-400))
+      .force('charge', d3.forceManyBody().strength(-4000))
       .force(
         'link',
         d3
@@ -53,10 +76,12 @@ export default {
           .id(d => d.id)
           .distance(150)
       )
-      .force('center', d3.forceCenter(this.svgWidth / 2, this.svgHeight / 2))
+      //.force('center', d3.forceCenter(this.svgWidth / 2, this.svgHeight / 2))
+      .force('x', d3.forceX())
+      .force('y', d3.forceY())
       .on('tick', this.ticked)
 
-    this.svg
+    this.canvas
       .append('defs')
       .selectAll('marker')
       .data(['one'])
@@ -72,13 +97,13 @@ export default {
       .attr('fill', '#999')
       .attr('d', 'M0,-5L10,0L0,5')
 
-    this.link = this.svg
+    this.link = this.canvas
       .append('g')
       .attr('stroke', '#999')
       .attr('stroke-opacity', 0.6)
       .selectAll('line')
 
-    this.node = this.svg
+    this.node = this.canvas
       .append('g')
       .attr('fill', 'currentColor')
       .attr('stroke-linecap', 'round')
@@ -86,17 +111,118 @@ export default {
       .selectAll('g')
 
     this.simulation.stop()
-    this.update(this.diagram.nodes, this.diagram.edges)
+    this.updateDiagram(this.diagram.nodes, this.diagram.edges)
+
+    this.updateLegend(this.diagram.groups)
+
+    // Zoom and Drag
+    this.svg.call(
+      d3
+        .zoom()
+        .extent([
+          [0, 0],
+          [this.svgWidth, this.svgHeight]
+        ])
+        .scaleExtent([0.25, 8])
+        .on('zoom', this.zoomed)
+    )
+
+    // Node mouse events
+    this.svg
+      .selectAll('circle')
+      .on('mouseover', d => {
+        d3.select(d.target)
+          .transition()
+          .duration('100')
+          .attr('stroke', '#48AAF9')
+          .attr('stroke-width', '3')
+          .style('cursor', 'pointer')
+      })
+      .on('mouseleave', d => {
+        d3.select(d.target)
+          .transition()
+          .duration('100')
+          .attr('stroke', 'none')
+      })
+      .on('click', (d, i) => {
+        // TODO: Implement "focus on diagram"
+        console.log(d, i.id)
+      })
   },
   methods: {
-    update(nodes, links) {
+    updateLegend(groups) {
+      // reset
+      this.svg.select('.legend').remove()
+
+      this.legend = this.svg
+        .append('g')
+        .attr('class', 'legend')
+        .attr('transform', 'translate(0,0)')
+
+      if (Object.keys(groups).length > 1) {
+        let arr = []
+        for (let g in groups) {
+          arr[groups[g]] = g
+        }
+        this.svg
+          .select('.legend')
+          .append('rect')
+          .attr('fill', '#eee')
+          .attr('opacity', '0.8')
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('height', arr.length * 20 + 50)
+          .attr('width', 150)
+        let g = this.svg
+          .select('.legend')
+          .selectAll('g')
+          .data(arr)
+          .enter()
+          .append('g')
+          .attr('x', 15)
+          .attr('y', (d, i) => {
+            console.log(d)
+            return i * 20 + 50
+          })
+          .attr('fill', (d, i) => {
+            console.log(d)
+            return this.color(i)
+          })
+        g.append('text')
+          .attr('x', 40)
+          .attr('y', (d, i) => {
+            return i * 20 + 60
+          })
+          .text(d => (d ? d : 'undefined'))
+        g.append('rect')
+          .attr('width', 10)
+          .attr('height', 10)
+          .attr('x', 20)
+          .attr('y', (d, i) => {
+            return i * 20 + 50
+          })
+      } else {
+        this.svg
+          .select('.legend')
+          .selectAll('g')
+          .remove()
+      }
+      this.legend
+        .append('text')
+        .attr('x', 15)
+        .attr('y', 25)
+        .text(`Services:`)
+        .style('font-weight', '600')
+      this.legend
+        .append('text')
+        .attr('id', 'serviceCount')
+        .attr('x', 90)
+        .attr('y', 25)
+        .text(this.diagram.nodes.length)
+    },
+    updateDiagram(nodes, links) {
       // FIXME: 10 colors only so far
-      const color = d3
-        .scaleOrdinal()
-        .domain([0, 10])
-        .range(['#eee'].concat(d3.schemeCategory10))
       const old = new Map(this.node.data().map(d => [d.id, d]))
-      // nodes = nodes.map(d => Object.create(d))
       nodes = nodes.map(d => Object.assign(old.get(d.id) || {}, d))
       links = links.map(d => Object.create(d))
 
@@ -110,7 +236,7 @@ export default {
               node
                 .append('circle')
                 .attr('r', 20)
-                .attr('fill', d => color(d.group))
+                .attr('fill', d => vm.color(d.group))
             })
             .call(vm.drag(vm.simulation))
             .call(node =>
@@ -127,7 +253,7 @@ export default {
             ),
         update =>
           update.call(node =>
-            node.select('circle').attr('fill', d => color(d.group))
+            node.select('circle').attr('fill', d => vm.color(d.group))
           )
       )
 
@@ -141,12 +267,14 @@ export default {
           d => `url(${new URL(`#arrow-${d.type}`, location)})`
         )
 
-      vm.simulation.nodes(nodes)
-      vm.simulation.force('link').links(links)
-      vm.simulation.alpha(1).restart()
+      this.simulation.nodes(nodes)
+      this.simulation.force('link').links(links)
+      this.simulation.alpha(1).restart()
+    },
+    zoomed({ transform }) {
+      this.canvas.attr('transform', transform)
     },
     ticked() {
-      //this.node.attr('cx', d => d.x).attr('cy', d => d.y)
       this.node.attr('transform', d => `translate(${d.x},${d.y})`)
 
       this.link
@@ -184,4 +312,8 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.legend {
+  padding: 10px;
+}
+</style>
