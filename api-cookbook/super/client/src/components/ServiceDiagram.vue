@@ -111,9 +111,7 @@ export default {
       .selectAll('g')
 
     this.simulation.stop()
-    this.updateDiagram(this.diagram.nodes, this.diagram.edges)
-
-    this.updateLegend(this.diagram.groups)
+    this.resetDiagram()
 
     // Zoom and Drag
     this.svg.call(
@@ -126,30 +124,56 @@ export default {
         .scaleExtent([0.25, 8])
         .on('zoom', this.zoomed)
     )
-
-    // Node mouse events
-    this.svg
-      .selectAll('circle')
-      .on('mouseover', d => {
-        d3.select(d.target)
-          .transition()
-          .duration('100')
-          .attr('stroke', '#48AAF9')
-          .attr('stroke-width', '3')
-          .style('cursor', 'pointer')
-      })
-      .on('mouseleave', d => {
-        d3.select(d.target)
-          .transition()
-          .duration('100')
-          .attr('stroke', 'none')
-      })
-      .on('click', (d, i) => {
-        // TODO: Implement "focus on diagram"
-        console.log(d, i.id)
-      })
   },
   methods: {
+    resetDiagram() {
+      this.updateDiagram(this.diagram.nodes, this.diagram.edges)
+      this.updateLegend(this.diagram.groups)
+      this.updateToolbar(false)
+    },
+    updateToolbar(add) {
+      if (!add) {
+        this.svg.select('.toolbar').remove()
+      } else {
+        this.toolbar = this.svg
+          .append('g')
+          .attr('class', 'toolbar')
+          .attr('transform', `translate(${this.svgWidth - 35},10)`)
+        this.toolbar
+          .append('circle')
+          .attr('cx', '12')
+          .attr('cy', '12')
+          .attr('r', 17)
+          .attr('fill', '#48AAF9')
+        let resetBtn = this.toolbar
+          .append('svg')
+          .attr('id', 'resetBtn')
+          .attr('width', '24')
+          .attr('height', '24')
+          .attr('viewbox', '0 0 24 24')
+          .attr('fill', 'none')
+          .attr('stroke', 'white')
+          .attr('stroke-width', '2')
+          .attr('stroke-line-cap', 'round')
+          .attr('stroke-linejoin', 'round')
+          .style('id', '')
+        resetBtn.append('polyline').attr('points', '23 4 23 10 17 10')
+        resetBtn.append('polyline').attr('points', '1 20 1 14 7 14')
+        resetBtn
+          .append('path')
+          .attr(
+            'd',
+            'M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15'
+          )
+        this.toolbar
+          .on('click', () => {
+            this.resetDiagram()
+          })
+          .on('mouseover', d => {
+            d3.select(d.target).style('cursor', 'pointer')
+          })
+      }
+    },
     updateLegend(groups) {
       // reset
       this.svg.select('.legend').remove()
@@ -181,11 +205,9 @@ export default {
           .append('g')
           .attr('x', 15)
           .attr('y', (d, i) => {
-            console.log(d)
             return i * 20 + 50
           })
           .attr('fill', (d, i) => {
-            console.log(d)
             return this.color(i)
           })
         g.append('text')
@@ -235,6 +257,7 @@ export default {
             .call(node => {
               node
                 .append('circle')
+                .attr('class', 'serviceNode')
                 .attr('r', 20)
                 .attr('fill', d => vm.color(d.group))
             })
@@ -251,6 +274,7 @@ export default {
                 .attr('stroke', 'white')
                 .attr('stroke-width', 5)
             ),
+
         update =>
           update.call(node =>
             node.select('circle').attr('fill', d => vm.color(d.group))
@@ -267,9 +291,51 @@ export default {
           d => `url(${new URL(`#arrow-${d.type}`, location)})`
         )
 
+      this.svg
+        .selectAll('circle')
+        .on('mouseover', d => {
+          d3.select(d.target)
+            .transition()
+            .duration('100')
+            .attr('stroke', '#48AAF9')
+            .attr('stroke-width', '3')
+            .style('cursor', 'pointer')
+        })
+        .on('mouseleave', d => {
+          d3.select(d.target)
+            .transition()
+            .duration('100')
+            .attr('stroke', 'none')
+        })
+        .on('click', (d, i) => {
+          vm.focusDiagram(i.id)
+        })
+
       this.simulation.nodes(nodes)
       this.simulation.force('link').links(links)
       this.simulation.alpha(1).restart()
+    },
+    focusDiagram(service) {
+      let svcs = []
+      let edges = []
+      let nodes = []
+      edges = this.diagram.edges.filter(e => {
+        return e.source == service || e.target == service
+      })
+      edges.forEach(e => {
+        if (!svcs.includes(e.source)) {
+          svcs.push(e.source)
+        }
+        if (!svcs.includes(e.target)) {
+          svcs.push(e.target)
+        }
+      })
+      nodes = this.diagram.nodes.filter(n => {
+        return svcs.includes(n.id)
+      })
+      // let groups = Object.create(this.diagram.groups)
+      this.updateDiagram(nodes, edges)
+      this.updateToolbar(true)
     },
     zoomed({ transform }) {
       this.canvas.attr('transform', transform)
@@ -312,8 +378,4 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-.legend {
-  padding: 10px;
-}
-</style>
+<style scoped lang="scss"></style>
