@@ -1,17 +1,33 @@
 <template>
   <div class="home container">
-    <b-field label="Overlay Attribute">
-      <b-autocomplete
-        v-model="searchAttribute"
-        placeholder="eg. platform"
-        :keep-first="false"
-        :open-on-focus="true"
-        :data="filteredAttributes"
-        field="name"
-        :clearable="true"
-        @select="o => (o ? (chosenAttribute = o.name) : (chosenAttribute = ''))"
-      />
-    </b-field>
+    <div class="content mt-5">
+      <h1>Super Service Diagram</h1>
+    </div>
+    <div class="columns">
+      <div class="column is-one-third">
+        <b-field label="Overlay Attribute" label-position="on-border">
+          <b-autocomplete
+            v-model="searchAttribute"
+            placeholder="eg. platform"
+            :keep-first="false"
+            :open-on-focus="true"
+            :data="filteredAttributes"
+            field="name"
+            :clearable="true"
+            @select="
+              o => (o ? (chosenAttribute = o.name) : (chosenAttribute = ''))
+            "
+          />
+        </b-field>
+      </div>
+      <div class="column is-one-third">
+        <button class="button is-light" @click="exportData()">
+          Export Data
+        </button>
+        <a id="downloadAnchor" style="display:none"></a>
+      </div>
+    </div>
+
     <div style="border: 5px solid #eee; border-radius: 10px;">
       <div v-if="diagramData.nodes">
         <ServiceDiagram :diagram="diagramData" />
@@ -127,6 +143,17 @@ export default {
       attribute: this.chosenAttribute
     })
     this.$store.dispatch('getAttributes')
+  },
+  methods: {
+    exportData() {
+      var dataStr =
+        'data:text/json;charset=utf-8,' +
+        encodeURIComponent(JSON.stringify(this.diagramData))
+      var dlAnchorElem = document.getElementById('downloadAnchor')
+      dlAnchorElem.setAttribute('href', dataStr)
+      dlAnchorElem.setAttribute('download', 'export.json')
+      dlAnchorElem.click()
+    }
   }
 }
 </script>

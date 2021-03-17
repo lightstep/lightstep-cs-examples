@@ -1,5 +1,5 @@
 <template>
-  <div id="container" class="container">
+  <div id="diagramContainer" class="container">
     <svg id="diagram" :width="svgWidth" :height="svgHeight"></svg>
   </div>
 </template>
@@ -45,12 +45,12 @@ export default {
   },
   computed: {
     svgHeight() {
-      return this.svgWidth // / 1.61803
+      return this.svgWidth / 1.61803
     }
   },
   watch: {
     svgWidth: function() {
-      this.svgWidth = document.getElementById('container').offsetWidth
+      this.svgWidth = document.getElementById('diagramContainer').offsetWidth
     },
     diagram: function(newD) {
       // Update here
@@ -60,7 +60,7 @@ export default {
     }
   },
   mounted() {
-    this.svgWidth = document.getElementById('container').offsetWidth
+    this.svgWidth = document.getElementById('diagramContainer').offsetWidth
 
     this.svg = d3.select('#diagram')
 
@@ -192,7 +192,7 @@ export default {
           .select('.legend')
           .append('rect')
           .attr('fill', '#eee')
-          .attr('opacity', '0.8')
+          .attr('opacity', '0.9')
           .attr('x', 0)
           .attr('y', 0)
           .attr('height', arr.length * 20 + 50)
@@ -243,10 +243,11 @@ export default {
         .text(this.diagram.nodes.length)
     },
     updateDiagram(nodes, links) {
-      // FIXME: 10 colors only so far
-      const old = new Map(this.node.data().map(d => [d.id, d]))
-      nodes = nodes.map(d => Object.assign(old.get(d.id) || {}, d))
+      // const old = new Map(this.node.data().map(d => [d.id, d]))
+      // nodes = nodes.map(d => Object.assign(old.get(d.id) || {}, d))
+      nodes = nodes.map(d => Object.create(d))
       links = links.map(d => Object.create(d))
+      console.log(nodes)
 
       const vm = this
 
@@ -276,9 +277,11 @@ export default {
             ),
 
         update =>
-          update.call(node =>
+          update.call(node => {
+            console.log('update called')
             node.select('circle').attr('fill', d => vm.color(d.group))
-          )
+          }),
+        exit => exit.call(node => node.remove())
       )
 
       this.link = this.link
@@ -316,6 +319,7 @@ export default {
       this.simulation.alpha(1).restart()
     },
     focusDiagram(service) {
+      console.log('focusing on ', service)
       let svcs = []
       let edges = []
       let nodes = []
@@ -333,7 +337,7 @@ export default {
       nodes = this.diagram.nodes.filter(n => {
         return svcs.includes(n.id)
       })
-      // let groups = Object.create(this.diagram.groups)
+      console.log(nodes, edges)
       this.updateDiagram(nodes, edges)
       this.updateToolbar(true)
     },
