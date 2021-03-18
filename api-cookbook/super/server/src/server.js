@@ -1,5 +1,3 @@
-const { tracer } = require('./tracer')
-
 const express = require('express'),
   cors = require('cors'),
   mongoose = require('mongoose'),
@@ -45,10 +43,8 @@ function runApp() {
   app.use('/api', serviceAPI)
   app.use('/api', tagAPI)
 
-  const port = process.env.APP_PORT || 4000
-
-  app.listen(port, () => {
-    logger.info('Super running on port: ' + port)
+  app.listen(8080, () => {
+    logger.info('Super running on port: ' + 8080)
   })
 
   app.use((req, res, next) => {

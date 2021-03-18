@@ -2,9 +2,10 @@
   "name": "super-service-diagram",
   "version": "0.1.0",
   "description": "",
-  "main": "src/server-init.js",
+  "main": "src/server.js",
   "scripts": {
-    "serve": "nodemon",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server-init.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "ishmeet@lightstep.com",

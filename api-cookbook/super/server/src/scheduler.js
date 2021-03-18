@@ -3,10 +3,14 @@ const schedule = require('node-schedule')
 const logger = require('./logger')
 const api = require('./api')
 const { tracer } = require('./tracer')
-const { context, setSpan, getSpan } = require('@opentelemetry/api')
+const { context, setSpan } = require('@opentelemetry/api')
+const constants = require('./constants')
 
 const redis = require('redis')
-const publisher = redis.createClient()
+const publisher = redis.createClient({
+  host: constants.REDIS_HOST,
+  port: constants.REDIS_PORT
+})
 
 const ServiceModel = require('./models/service')
 
@@ -134,10 +138,10 @@ function startScheduler() {
   syncServices() // TODO: turn on
   syncStreams() // TODO: turn on
 
-  schedule.scheduleJob(rule, () => {
-    syncServices() // TODO: turn on
-    syncStreams() // TODO: turn on
-  })
+  // schedule.scheduleJob(rule, () => {
+  //   syncServices() // TODO: turn on
+  //   syncStreams() // TODO: turn on
+  // })
 
   logger.info('Started scheduler')
 }

@@ -1,10 +1,14 @@
 const { tracer } = require('./tracer')
-const { context, setSpan, getSpan } = require('@opentelemetry/api')
+const { context, setSpan } = require('@opentelemetry/api')
+const constants = require('./constants')
 
 const async = require('async')
 
 const redis = require('redis')
-const subscriber = redis.createClient()
+const subscriber = redis.createClient({
+  host: constants.REDIS_HOST,
+  port: constants.REDIS_PORT
+})
 const logger = require('./logger')
 const api = require('./api')
 
@@ -20,8 +24,8 @@ let limiter = new Bottleneck({
   datastore: 'redis',
   clearDatastore: true,
   clientOptions: {
-    host: '127.0.0.1',
-    port: 6379
+    host: constants.REDIS_HOST,
+    port: constants.REDIS_PORT
   }
 })
 
