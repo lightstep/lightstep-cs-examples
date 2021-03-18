@@ -243,11 +243,9 @@ export default {
         .text(this.diagram.nodes.length)
     },
     updateDiagram(nodes, links) {
-      // const old = new Map(this.node.data().map(d => [d.id, d]))
-      // nodes = nodes.map(d => Object.assign(old.get(d.id) || {}, d))
-      nodes = nodes.map(d => Object.create(d))
+      const old = new Map(this.node.data().map(d => [d.id, d]))
+      nodes = nodes.map(d => Object.assign(old.get(d.id) || {}, d))
       links = links.map(d => Object.create(d))
-      console.log(nodes)
 
       const vm = this
 
@@ -266,21 +264,27 @@ export default {
             .call(node =>
               node
                 .append('text')
+                .attr('class', 'service-name')
                 .attr('x', 22)
                 .attr('y', '0.31em')
                 .text(d => d.id)
                 .clone(true)
                 .lower()
                 .attr('fill', 'none')
+                .attr('class', 'service-name-outline')
                 .attr('stroke', 'white')
                 .attr('stroke-width', 5)
             ),
 
         update =>
-          update.call(node => {
-            console.log('update called')
-            node.select('circle').attr('fill', d => vm.color(d.group))
-          }),
+          update
+            .call(node => {
+              node.select('circle').attr('fill', d => vm.color(d.group))
+            })
+            .call(node => {
+              node.select('text.service-name').text(d => d.id)
+              node.select('text.service-name-outline').text(d => d.id)
+            }),
         exit => exit.call(node => node.remove())
       )
 
