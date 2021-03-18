@@ -5,13 +5,12 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: "super-server"
+    container_name: super-server
     depends_on:
       - database
     ports:
       - "4000:8080"
     networks:
-      - frontend
       - backend
     environment:
       - MONGO_HOST=database
@@ -51,5 +50,4 @@ services:
     networks:
       - backend
 networks:
-  frontend:
   backend:
