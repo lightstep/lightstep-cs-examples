@@ -1,7 +1,5 @@
 <template>
-  <div id="diagramContainer" class="container">
-    <svg id="diagram" :width="svgWidth" :height="svgHeight"></svg>
-  </div>
+  <div id="diagramContainer" class="container"></div>
 </template>
 
 <script>
@@ -62,7 +60,12 @@ export default {
   mounted() {
     this.svgWidth = document.getElementById('diagramContainer').offsetWidth
 
-    this.svg = d3.select('#diagram')
+    this.svg = d3
+      .select('#diagramContainer')
+      .append('svg')
+      .attr('preserveAspectRatio', 'xMinYMin meet')
+      .attr('viewBox', `0 0 ${this.svgWidth} ${this.svgHeight}`)
+      .attr('class', 'svg-content-responsive')
 
     this.canvas = this.svg.append('g')
 
