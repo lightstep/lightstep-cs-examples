@@ -8,7 +8,10 @@ destination:
   #endpoint: http://127.0.0.1:9876
 
   # metricingest external grpc port
-  endpoint: http://127.0.0.1:10716
+  # endpoint: http://127.0.0.1:10716
+
+  # metricingest envoy: use with "self_signed.bundle.pem" below
+  endpoint: https://localhost:10002
 
   # Collector plain port
   # endpoint: http://127.0.0.1:9998
@@ -20,6 +23,10 @@ destination:
 
 disable_diagnostics: false
 disable_supervisor: false
+
+security:
+  root_certificates:
+  - /Users/jmacd/src/lightstep/certs/self_signed.bundle.pem
 
 log:
   level: info
