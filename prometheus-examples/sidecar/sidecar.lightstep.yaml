@@ -3,7 +3,8 @@ destination:
   #endpoint: https://ingest.lightstep.com:443
 
   headers: 
-    lightstep-access-token: 5fKQnjSA+LYfH5ODStKrSMDGgFNpsgZaKtrqJ5P9RNLQVD9UPFcOCFyE2f8SamoVNbUTKb33zcVMTI+vXVY=
+    lightstep-access-token: d27e362c2cd84b807b793427053cb873
+    #lightstep-access-token: 5fKQnjSA+LYfH5ODStKrSMDGgFNpsgZaKtrqJ5P9RNLQVD9UPFcOCFyE2f8SamoVNbUTKb33zcVMTI+vXVY=
     #lightstep-access-token: 4IY1I9adf9FeOUUFgHiOaWIp4hRs1NDlwQfyzV02oRA+/3PBGchUJ0MoQkHKuxQcHC/+AYLM5k7iVboj5A6NP12eVjICe9+yQOT9bNsv
 
 prometheus:
@@ -12,4 +13,4 @@ prometheus:
 startup_delay: 1s
 
 log:
-  level: debug
+  level: info
