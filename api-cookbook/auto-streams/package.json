@@ -1,0 +1,32 @@
+{
+  "name": "auto-streams",
+  "version": "1.0.0",
+  "description": "",
+  "main": "start.js",
+  "scripts": {
+    "start": "node src/start.js",
+    "schedule": "node src/schedule.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ishmeet@lightstep.com",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.20.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "nodemon": "^2.0.7",
+    "prettier": "^2.2.1"
+  },
+  "dependencies": {
+    "async": "^3.2.0",
+    "axios": "^0.21.1",
+    "body-parser": "^1.19.0",
+    "bottleneck": "^2.19.5",
+    "cors": "^2.8.5",
+    "lightstep-opentelemetry-launcher-node": "^0.14.0",
+    "moment": "^2.29.1",
+    "node-schedule": "^2.0.0",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.0"
+  }
+}
