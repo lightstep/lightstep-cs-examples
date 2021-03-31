@@ -8,7 +8,7 @@ if (constants.LIGHTSTEP_ACCESS_TOKEN != '') {
 
   const sdk = lightstep.configureOpenTelemetry({
     accessToken: constants.LIGHTSTEP_ACCESS_TOKEN,
-    serviceName: 'super'
+    serviceName: '@auto-streams'
   })
   sdk.start().then(() => {
     logger.info('Node OTEL SDK initialized')

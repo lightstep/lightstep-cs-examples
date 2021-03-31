@@ -59,6 +59,7 @@ function startJob() {
             cb(err, null)
           })
       },
+      // TODO: Maybe also create dashboards for a service
       // function (services, streams, cb) {
       //   const getDashboardsSpan = startSpan('getDashboards', { parent: span })
       //   api
@@ -86,15 +87,23 @@ function startJob() {
             })
             if (tmpstreams.length == 0) {
               // create the stream
-              logger.info(`Creating stream for 'service IN ${svc}'`)
-              api
-                .createStream(`service IN ("${svc}")`, `Service: ${svc}`)
-                .then((res) => {
-                  callback()
-                })
-                .catch((err) => {
-                  callback(err)
-                })
+
+              // Check if we're doing a dry run
+              if (!constants.DRY_RUN) {
+                // Actually create
+                logger.info(`Creating stream for 'service IN ${svc}'`)
+                api
+                  .createStream(`service IN ("${svc}")`, `Service: ${svc}`)
+                  .then((res) => {
+                    callback()
+                  })
+                  .catch((err) => {
+                    callback(err)
+                  })
+              } else {
+                logger.info(`Will create stream for 'service IN ${svc}'`)
+                callback()
+              }
             } else {
               callback()
             }

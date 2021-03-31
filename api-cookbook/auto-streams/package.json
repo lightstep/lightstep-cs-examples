@@ -4,6 +4,7 @@
   "description": "",
   "main": "start.js",
   "scripts": {
+    "dryrun": "DRY_RUN=true node src/start.js",
     "start": "node src/start.js",
     "schedule": "node src/schedule.js",
     "test": "echo \"Error: no test specified\" && exit 1"
