@@ -77,8 +77,6 @@ function startJob() {
       //     })
       // },
       function (services, streams, cb) {
-        console.log(services)
-        console.log(streams)
         // Check if a stream exists for each service. If not, create one.
         async.each(
           services,
@@ -86,10 +84,7 @@ function startJob() {
             let tmpstreams = streams.filter((strm) => {
               return strm.includes(`service IN ("${svc}")`)
             })
-            if (
-              tmpstreams.length == 0 ||
-              !tmpstreams.includes(`service IN ("${svc}")`)
-            ) {
+            if (tmpstreams.length == 0) {
               // create the stream
               logger.info(`Creating stream for 'service IN ${svc}'`)
               api
