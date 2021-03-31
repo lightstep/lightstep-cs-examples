@@ -14,8 +14,6 @@ const publisher = redis.createClient({
 
 const ServiceModel = require('./models/service')
 
-const INTERVAL_MINUTES = 20
-
 function syncStreams() {
   // This function finds all streams created on a component or service
   // Then gets their last 10 minutes of exemplar traces
@@ -63,7 +61,7 @@ function syncStreams() {
               .catch((err) => {
                 streamSpan.setAttribute('error', true)
                 streamSpan.end()
-                cb('some error') // FIXME
+                cb(err)
               })
           })
         },
@@ -120,16 +118,22 @@ function syncServices() {
       .catch((err) => {
         span.setAttribute('error', true)
         span.end()
-        logger.error(err)
+        if (err.response) {
+          logger.error(err.response.status)
+        } else if (err.request) {
+          logger.error(err.request)
+        } else {
+          logger.error(err.message)
+        }
       })
   })
 }
 
 function startScheduler() {
   let rule = new schedule.RecurrenceRule()
-  rule.minute = new schedule.Range(0, 59, INTERVAL_MINUTES)
+  rule.minute = new schedule.Range(0, 59, constants.SCHEDULER_INTERVAL_MINUTES)
 
-  // Run once on start
+  // Run once on start, comment out if testing or developing
   syncServices()
   syncStreams()
   // Schedule future runs
@@ -138,7 +142,7 @@ function startScheduler() {
     syncStreams()
   })
 
-  logger.info('Started scheduler')
+  logger.info('Scheduler started')
 }
 
 module.exports = {

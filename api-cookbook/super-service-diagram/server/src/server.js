@@ -43,8 +43,8 @@ function runApp() {
   app.use('/api', serviceAPI)
   app.use('/api', tagAPI)
 
-  app.listen(8080, () => {
-    logger.info('Super running on port: ' + 8080)
+  app.listen(constants.SERVER_PORT, () => {
+    logger.info('Super running on port: ' + constants.SERVER_PORT)
   })
 
   app.use((req, res, next) => {
@@ -57,5 +57,10 @@ function runApp() {
     res.status(err.statusCode).send(err.message)
   })
   mixer.startMixer()
-  scheduler.startScheduler()
+  if (constants.ENABLE_SCHEDULER) {
+    logger.info('Starting scheduler')
+    scheduler.startScheduler()
+  } else {
+    logger.info('Scheduler not started')
+  }
 }

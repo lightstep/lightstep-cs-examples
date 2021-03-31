@@ -1,29 +1,33 @@
+const logger = require('./logger')
 const constants = require('./constants')
-
-// OpenTelemetry
-const { lightstep } = require('lightstep-opentelemetry-launcher-node')
-
 const startScript = './server'
 
-const sdk = lightstep.configureOpenTelemetry({
-  accessToken: constants.LS_ACCESS_TOKEN,
-  serviceName: 'super'
-})
+if (constants.LIGHTSTEP_ACCESS_TOKEN != '') {
+  logger.info('Starting Lightstep OTEL Launcher')
+  // OpenTelemetry
+  const { lightstep } = require('lightstep-opentelemetry-launcher-node')
 
-sdk.start().then(() => {
+  const sdk = lightstep.configureOpenTelemetry({
+    accessToken: constants.LIGHTSTEP_ACCESS_TOKEN,
+    serviceName: '@super-service-diagram'
+  })
+  sdk.start().then(() => {
+    logger.info('Node OTEL SDK initialized')
+    require(startScript)
+  })
+  function shutdown() {
+    sdk
+      .shutdown()
+      .then(
+        () => logger.info('shutdown complete'),
+        (err) => logger.error('error shutting down', err)
+      )
+      .finally(() => process.exit(0))
+  }
+  process.on('beforeExit', shutdown)
+  process.on('SIGINT', shutdown)
+  process.on('SIGTERM', shutdown)
+} else {
+  logger.warn('No access token set, starting without tracing')
   require(startScript)
-})
-
-function shutdown() {
-  sdk
-    .shutdown()
-    .then(
-      () => console.log('shutdown complete'),
-      (err) => console.log('error shutting down', err)
-    )
-    .finally(() => process.exit(0))
 }
-
-process.on('beforeExit', shutdown)
-process.on('SIGINT', shutdown)
-process.on('SIGTERM', shutdown)

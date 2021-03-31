@@ -55,6 +55,7 @@ function getTime() {
     offset_min = '0' + offset_min
   }
 
+  // Attempt to get dynamic timezone
   if (timezone_offset_min < 0) {
     timezone_standard = '+' + offset_hrs + ':' + offset_min
   } else if (timezone_offset_min > 0) {
@@ -63,8 +64,11 @@ function getTime() {
     timezone_standard = '-00:00'
   }
 
-  timezone_standard = '-00:00' // FIXME: Remove this
+  timezone_standard = '-00:00' // FIXME: This hardcodes UTC timezone
 
+  // For time range, we start at STREAM_TIME_AGO_MINUTES, 
+  // then go back as far as the STREAM_TIME_RANGE_MINUTES
+  // This ensures we're only getting fully assembled traces
   let now = new Date()
   let oldest =
     new Date(
