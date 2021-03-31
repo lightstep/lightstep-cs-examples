@@ -24,14 +24,14 @@ function syncStreams() {
   const span = tracer.startSpan('syncStreams')
   context.with(setSpan(context.active(), span), () => {
     api.getStreams().then((res) => {
-      let streams = res.data.filter((s) => {
-        return (
-          s.attributes.name.includes('component:') ||
-          s.attributes.name.includes('service IN')
-        )
-      })
+      // let streams = res.data.filter((s) => {
+      //   return (
+      //     s.attributes.name.includes('component:') ||
+      //     s.attributes.name.includes('service IN')
+      //   )
+      // })
+      let streams = res.data
 
-      // streams = streams.slice(0, 1) // FIXME: Remove this
       streams = streams.map((s) => {
         return s.id
       })
@@ -136,8 +136,8 @@ function startScheduler() {
   rule.minute = new schedule.Range(0, 59, INTERVAL_MINUTES)
 
   schedule.scheduleJob(rule, () => {
-    syncServices() // TODO: turn on
-    syncStreams() // TODO: turn on
+    syncServices()
+    syncStreams()
   })
 
   logger.info('Started scheduler')
