@@ -218,7 +218,7 @@ async function updateServiceMap(span_guid) {
         )
       })
       .catch((err) => {
-        // TODO: retry
+        // FIXME: Retry if weren't able to get the trace for some reason
         span.setAttribute('error', true)
         span.end()
         logger.error(`${err} for ${span_guid}`)

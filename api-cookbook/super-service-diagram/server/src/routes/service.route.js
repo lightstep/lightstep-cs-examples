@@ -57,7 +57,7 @@ serviceRoute.route('/services').get((req, res, next) => {
                     lastSeen: new Date(t.lastSeen)
                   }
                 })
-                // FIXME: Order by latest value seen
+                // Order by latest value seen
                 serviceTags.sort((a, b) => {
                   return b.lastSeen - a.lastSeen
                 })

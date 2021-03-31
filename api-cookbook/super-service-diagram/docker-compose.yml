@@ -23,6 +23,8 @@ services:
       - LIGHTSTEP_ORG=${LIGHTSTEP_ORG}
       - LIGHTSTEP_PROJECT=${LIGHTSTEP_PROJECT}
       - LIGHTSTEP_API_KEY=${LIGHTSTEP_API_KEY}
+      - LIGHTSTEP_ACCESS_TOKEN=${LIGHTSTEP_ACCESS_TOKEN}
+      - ENABLE_SCHEDULER=${ENABLE_SCHEDULER}
   database:
     image: "mongo"
     container_name: "mongo-db-container"
