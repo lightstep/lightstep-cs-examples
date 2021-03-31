@@ -27,5 +27,5 @@ if (constants.LIGHTSTEP_ACCESS_TOKEN != '') {
   process.on('SIGINT', shutdown)
   process.on('SIGTERM', shutdown)
 } else {
-  require(startScript)
+  require('./job').scheduleJob()
 }
