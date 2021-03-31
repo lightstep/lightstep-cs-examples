@@ -1,0 +1,53 @@
+version: "3"
+services:
+  server:
+    image: super-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: super-server
+    depends_on:
+      - database
+    ports:
+      - "4000:8080"
+    networks:
+      - backend
+    environment:
+      - MONGO_HOST=database
+      - MONGO_PORT=27017
+      - MONGO_DB_NAME=lightstep
+      - MONGO_USER=lightstep
+      - MONGO_PASSWORD=lightstep
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LIGHTSTEP_ORG=${LIGHTSTEP_ORG}
+      - LIGHTSTEP_PROJECT=${LIGHTSTEP_PROJECT}
+      - LIGHTSTEP_API_KEY=${LIGHTSTEP_API_KEY}
+  database:
+    image: "mongo"
+    container_name: "mongo-db-container"
+    networks:
+      - backend
+    volumes:
+      - ./db/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./db/mongo-volume:/data/db
+    ports:
+      - "27017-27019:27017-27019"
+    environment:
+      - MONGO_INITDB_DATABASE=lightstep
+      - MONGO_INITDB_ROOT_USERNAME=lightstep
+      - MONGO_INITDB_ROOT_PASSWORD=lightstep
+  redis:
+    image: "redis"
+    container_name: "redis-container"
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./db/redis-volume:/data
+      - ./db/redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    networks:
+      - backend
+networks:
+  backend:
