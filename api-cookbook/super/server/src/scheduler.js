@@ -24,12 +24,6 @@ function syncStreams() {
   const span = tracer.startSpan('syncStreams')
   context.with(setSpan(context.active(), span), () => {
     api.getStreams().then((res) => {
-      // let streams = res.data.filter((s) => {
-      //   return (
-      //     s.attributes.name.includes('component:') ||
-      //     s.attributes.name.includes('service IN')
-      //   )
-      // })
       let streams = res.data
 
       streams = streams.map((s) => {
@@ -135,6 +129,10 @@ function startScheduler() {
   let rule = new schedule.RecurrenceRule()
   rule.minute = new schedule.Range(0, 59, INTERVAL_MINUTES)
 
+  // Run once on start
+  syncServices()
+  syncStreams()
+  // Schedule future runs
   schedule.scheduleJob(rule, () => {
     syncServices()
     syncStreams()
