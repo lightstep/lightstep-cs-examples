@@ -20,9 +20,9 @@ services:
       - MONGO_PASSWORD=lightstep
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - LIGHTSTEP_ORG=LightStep
-      - LIGHTSTEP_PROJECT=demo
-      - LIGHTSTEP_API_KEY=<ADD API KEY HERE (no quotes)>
+      - LIGHTSTEP_ORG=${LIGHTSTEP_ORG}
+      - LIGHTSTEP_PROJECT=${LIGHTSTEP_PROJECT}
+      - LIGHTSTEP_API_KEY=${LIGHTSTEP_API_KEY}
   database:
     image: "mongo"
     container_name: "mongo-db-container"

@@ -39,10 +39,15 @@ function parseTrace(spans, reporters) {
   let services = {}
   reporters.forEach((r) => {
     // Assuming unique values per trace
-    services[r['reporter-id']] = {
-      name: r.attributes['lightstep.component_name'],
-      tags: { platform: [r.attributes['lightstep.tracer_platform']] }
+    let svc = {
+      name: r.attributes['lightstep.component_name'], // getting the service name
+      tags: {}
     }
+    // getting all the tracer level tags
+    for (let [key, value] of Object.entries(r.attributes)) {
+      svc.tags[key] = [value]
+    }
+    services[r['reporter-id']] = svc
   })
   let refinedSpans = {}
   spans.forEach((s) => {
