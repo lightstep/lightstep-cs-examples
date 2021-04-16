@@ -18,6 +18,12 @@ destination:
 
   compression: none
 
+  attributes:
+    __external_label1: ext1
+    __external_label2: ext2
+    internal_label1: int1
+    internal_label2: int2
+
   headers:
     lightstep-access-token: jzBy2simG8KqfzCt0UA4PD36EF+7/pIGStpCYNChtii6WfoU0Na53xFFzM67LoqqlRRhNy3fdeHJ/0wOvS0=
 

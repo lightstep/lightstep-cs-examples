@@ -6,3 +6,24 @@ scrape_configs:
 
     static_configs:
     - targets: ['localhost:18000']
+
+  - job_name: 'sample-app2'
+
+    scrape_interval: 60s
+
+    static_configs:
+    - targets: ['localhost:18000']
+
+  - job_name: 'sample-app3'
+
+    scrape_interval: 90s
+
+    static_configs:
+    - targets: ['localhost:18000']
+
+  - job_name: 'sample-app4'
+
+    scrape_interval: 15s
+
+    static_configs:
+    - targets: ['localhost:18000']
