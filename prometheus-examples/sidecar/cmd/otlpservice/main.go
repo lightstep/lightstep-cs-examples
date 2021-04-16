@@ -12,16 +12,22 @@ import (
 	"os"
 	"path"
 
-	metricService "github.com/lightstep/lightstep-cs-examples/prometheus-examples/sidecar/cmd/otlpservice/internal/opentelemetry-proto-gen/collector/metrics/v1"
-	traceService "github.com/lightstep/lightstep-cs-examples/prometheus-examples/sidecar/cmd/otlpservice/internal/opentelemetry-proto-gen/collector/trace/v1"
+	metricService "go.opentelemetry.io/proto/otlp/collector/metrics/v1"
+	traceService "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	_ "google.golang.org/grpc/encoding/gzip"
 	grpcMetadata "google.golang.org/grpc/metadata"
 )
 
 type (
-	metricServer struct{}
-	traceServer  struct{}
+	metricServer struct {
+		metricService.UnimplementedMetricsServiceServer
+	}
+
+	traceServer struct {
+		traceService.UnimplementedTraceServiceServer
+	}
 )
 
 var (
@@ -100,6 +106,22 @@ func (t *metricServer) Export(ctx context.Context, req *metricService.ExportMetr
 	}
 	data, _ := json.MarshalIndent(req, "", "  ")
 	fmt.Println("Export:", string(data))
+
+	// r := rand.Float64()
+	// if r < 0.001 {
+	// 	// Infinite loop, etc.
+	// 	fmt.Println("I'm in an infinite loop")
+	// 	select {}
+	// }
+	// if r < 0.01 {
+	// 	return &emptyValue, status.Error(codes.InvalidArgument, "test unrecoverable error")
+	// }
+	// if r < 0.1 {
+	// 	return &emptyValue, status.Error(codes.DataLoss, "test recoverable error")
+	// }
+	// if d := (1 + rand.NormFloat64()) * float64(5*time.Millisecond); d > 0 {
+	// 	time.Sleep(time.Duration(d))
+	// }
 	return &emptyValue, nil
 }
 
