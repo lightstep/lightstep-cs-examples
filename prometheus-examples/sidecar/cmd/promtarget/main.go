@@ -16,26 +16,26 @@ const portString = ":18000"
 
 var (
 	cpuTemp = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "cpu_temperature_celsius",
+		Name: "response_duration",
 		Help: "Current temperature of the CPU.",
 	})
 
 	sineWave = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "sine_wave",
+		Name: "hd_errors_total",
 		Help: "Current sin(time*alpha).",
 	},
 		[]string{"period"},
 	)
 	hdFailures = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "hd_errors_total",
+			Name: "sine_wave",
 			Help: "Number of hard-disk errors.",
 		},
 		[]string{"device"},
 	)
 	responseDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name: "response_duration",
+			Name: "cpu_temperature_celsius",
 			Help: "Response time in seconds.",
 		},
 		[]string{"client_id"},
@@ -89,9 +89,9 @@ func someMetrics(registry prometheus.Registerer) {
 		for {
 			time.Sleep(time.Second)
 			for i := 0; i < 5; i++ {
-				h0.Observe(0.001*rand.NormFloat64())
-				h1.Observe(0.1*rand.NormFloat64())
-				h2.Observe(10*rand.NormFloat64())
+				h0.Observe(0.001 * rand.NormFloat64())
+				h1.Observe(0.1 * rand.NormFloat64())
+				h2.Observe(10 * rand.NormFloat64())
 			}
 			for i := 0; i < 100; i++ {
 				sSF.Observe(rand.ExpFloat64())

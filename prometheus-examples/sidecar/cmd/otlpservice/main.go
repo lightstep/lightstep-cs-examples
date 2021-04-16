@@ -12,8 +12,8 @@ import (
 	"os"
 	"path"
 
-	metricService "github.com/lightstep/lightstep-cs-examples/prometheus-examples/sidecar/cmd/otlpservice/internal/opentelemetry-proto-gen/collector/metrics/v1"
-	traceService "github.com/lightstep/lightstep-cs-examples/prometheus-examples/sidecar/cmd/otlpservice/internal/opentelemetry-proto-gen/collector/trace/v1"
+	metricService "go.opentelemetry.io/proto/otlp/collector/metrics/v1"
+	traceService "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	_ "google.golang.org/grpc/encoding/gzip"
@@ -21,8 +21,13 @@ import (
 )
 
 type (
-	metricServer struct{}
-	traceServer  struct{}
+	metricServer struct {
+		metricService.UnimplementedMetricsServiceServer
+	}
+
+	traceServer struct {
+		traceService.UnimplementedTraceServiceServer
+	}
 )
 
 var (
