@@ -1,4 +1,7 @@
+### Latest api: ^1.0.0-rc.0, core: ^0.19.0, contrib: ^0.16.0
+
 ### Installation
+
 1. First install required packages
 ```bash
 npm install

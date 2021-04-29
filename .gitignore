@@ -91,3 +91,4 @@ target/
 
 ## Angular ##
 /node_modules
+package-lock.json
