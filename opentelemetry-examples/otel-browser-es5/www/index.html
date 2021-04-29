@@ -5,9 +5,12 @@
     <meta charset="utf-8">
     <title>Demo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="traceparent" content="00-ab01124a3c573678d4d8b21ba52df3bf-d21f7bc17caa5a01-01">
+
     <!-- otel.min.js is exposing everything globally -->
     <script type="text/javascript" src="otel.min.js"></script>
     <script type="text/javascript">
+
       var tracerProvider = new WebTracerProvider();
       tracerProvider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
       tracerProvider.addSpanProcessor(new BatchSpanProcessor(new CollectorTraceExporter({
@@ -24,9 +27,14 @@
 
       registerInstrumentations({
         instrumentations: [
-          new DocumentLoad(),
+          new DocumentLoadInstrumentation(),
           new UserInteractionInstrumentation(),
-          new XMLHttpRequestInstrumentation(),
+          new XMLHttpRequestInstrumentation({
+            propagateTraceHeaderCorsUrls: /.+/,
+          }),
+          new FetchInstrumentation({
+            propagateTraceHeaderCorsUrls: /.+/,
+          }),
         ],
         tracerProvider: tracerProvider,
       });
@@ -39,6 +47,15 @@ Also update "Lightstep-Access-Token" to see traces in Lightstep<br/>
 <button id="button">Click me</button>
 
 <script>
+  // in case you want to test fetch insted of xmlhttprequest
+  // const getData = (url) => fetch(url, {
+  //   method: 'GET',
+  //   headers: {
+  //     'Accept': 'application/json',
+  //     'Content-Type': 'application/json',
+  //   },
+  // });
+
   function getData(url, callback) {
     var req = new XMLHttpRequest();
     req.open('GET', url, true);

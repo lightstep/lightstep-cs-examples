@@ -1,3 +1,5 @@
+### Latest api: ^1.0.0-rc.0, core: ^0.19.0, contrib: ^0.16.0
+
 This is an example of how to use OpenTelemetry in the Browser.
 
 If your application does not use a build system, you can follow this example to create a minified JS file for all the tracing components that will be needed and configuring them to send data to Lightstep.
