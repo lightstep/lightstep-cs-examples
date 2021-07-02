@@ -5,10 +5,16 @@
     <meta charset="utf-8">
     <title>Demo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--    <meta name="traceparent" content="00-ab01124a3c573678d4d8b21ba52df3bf-d21f7bc17caa5a01-01">-->
+
     <!-- otel.min.js is exposing everything globally -->
     <script type="text/javascript" src="otel.min.js"></script>
     <script type="text/javascript">
-      var tracerProvider = new WebTracerProvider();
+      var tracerProvider = new WebTracerProvider({
+        resource: new Resource({
+          'service.name': 'lightstep_example',
+        }),
+      });
       tracerProvider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
       tracerProvider.addSpanProcessor(new BatchSpanProcessor(new CollectorTraceExporter({
         headers: {
@@ -24,7 +30,7 @@
 
       registerInstrumentations({
         instrumentations: [
-          new DocumentLoad(),
+          new DocumentLoadInstrumentation(),
           new UserInteractionInstrumentation(),
           new XMLHttpRequestInstrumentation(),
         ],
@@ -52,7 +58,7 @@ Also update "Lightstep-Access-Token" to see traces in Lightstep<br/>
 
   function clickMe() {
     // just an example to download something
-    getData('https://httpbin.org/get?a=1', () => {
+    getData('https://httpbin.org/get?a=1', function () {
       console.log('data downloaded 1');
     });
   }

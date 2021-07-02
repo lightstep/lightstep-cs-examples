@@ -18,8 +18,9 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
+            babelrc: false,
+            configFile: path.resolve(__dirname, 'babel.config.js'),
             presets: ['@babel/preset-env'],
-            plugins: ['@babel/plugin-transform-runtime']
           },
         },
       },
