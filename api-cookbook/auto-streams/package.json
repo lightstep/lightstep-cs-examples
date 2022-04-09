@@ -25,7 +25,7 @@
     "bottleneck": "^2.19.5",
     "cors": "^2.8.5",
     "lightstep-opentelemetry-launcher-node": "^0.14.0",
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "node-schedule": "^2.0.0",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.0"
