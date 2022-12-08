@@ -21,7 +21,7 @@
   "dependencies": {
     "async": "^3.2.0",
     "axios": "^0.21.1",
-    "body-parser": "^1.19.0",
+    "body-parser": "^1.20.1",
     "bottleneck": "^2.19.5",
     "cors": "^2.8.5",
     "lightstep-opentelemetry-launcher-node": "^0.14.0",
